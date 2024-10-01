@@ -28,7 +28,7 @@ class AccountServiceTest {
     fun `should throw exception when trying to create account with negative balance`() {
         // given
         val name = "Jan Kowalski"
-        val initialBalance = BigDecimal(1000.0)
+        val initialBalance = BigDecimal(-1000.0)
 
         // when
         val exception = assertThrows<IllegalArgumentException> {

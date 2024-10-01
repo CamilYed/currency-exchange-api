@@ -1,8 +1,12 @@
+package camilyed.github.io.currencyexchangeapi
+
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 
 class AccountServiceTest {
+
+    var accountService = AccountService()
 
     @Test
     fun `should create a new account with valid details`() {

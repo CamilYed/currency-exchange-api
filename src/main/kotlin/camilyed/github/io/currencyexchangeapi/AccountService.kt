@@ -4,7 +4,7 @@ import java.util.*
 
 class AccountService {
 
-    fun create(name: String, balance: Double): Account {
-        return Account(id = UUID.randomUUID(), owner = name, balancePln = balance)
+    fun create(command: CreateAccountCommand): Account {
+        return Account(id = UUID.randomUUID(), owner = command.owner, balancePln = command.initialBalance)
     }
 }

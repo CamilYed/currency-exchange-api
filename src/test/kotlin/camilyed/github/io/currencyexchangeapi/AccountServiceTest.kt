@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test
 
 class AccountServiceTest {
 
-    var accountService = AccountService()
+    private val accountService = AccountService()
 
     @Test
     fun `should create a new account with valid details`() {
@@ -15,7 +15,7 @@ class AccountServiceTest {
         val initialBalance = 1000.0
 
         // when
-        val account = accountService.create(name, initialBalance);
+        val account = accountService.create(CreateAccountCommand(owner =  name, initialBalance = initialBalance));
 
         // then
         assertNotNull(account.id, "Account ID should not be null")

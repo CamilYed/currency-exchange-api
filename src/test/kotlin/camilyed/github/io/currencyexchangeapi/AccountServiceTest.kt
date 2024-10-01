@@ -3,6 +3,7 @@ package camilyed.github.io.currencyexchangeapi
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
 
 class AccountServiceTest {
 
@@ -12,10 +13,10 @@ class AccountServiceTest {
     fun `should create a new account with valid details`() {
         // given
         val name = "Jan Kowalski"
-        val initialBalance = 1000.0
+        val initialBalance = BigDecimal(1000.0)
 
         // when
-        val account = accountService.create(CreateAccountCommand(owner =  name, initialBalance = initialBalance));
+        val account = accountService.create(CreateAccountCommand(owner =  name, initialBalance = initialBalance))
 
         // then
         assertNotNull(account.id, "Account ID should not be null")

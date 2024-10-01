@@ -1,4 +1,4 @@
-package camilyed.github.io.currencyexchangeapi
+package camilyed.github.io.currencyexchangeapi.domain
 
 import java.math.BigDecimal
 import java.util.UUID

@@ -1,4 +1,4 @@
-package camilyed.github.io.currencyexchangeapi
+package camilyed.github.io.currencyexchangeapi.application
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull

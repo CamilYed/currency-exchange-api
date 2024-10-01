@@ -1,4 +1,4 @@
-package camilyed.github.io.currencyexchangeapi
+package camilyed.github.io.currencyexchangeapi.application
 
 import java.math.BigDecimal
 

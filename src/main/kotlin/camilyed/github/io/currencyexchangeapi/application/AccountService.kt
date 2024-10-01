@@ -1,5 +1,6 @@
-package camilyed.github.io.currencyexchangeapi
+package camilyed.github.io.currencyexchangeapi.application
 
+import camilyed.github.io.currencyexchangeapi.domain.Account
 import java.util.*
 
 class AccountService {

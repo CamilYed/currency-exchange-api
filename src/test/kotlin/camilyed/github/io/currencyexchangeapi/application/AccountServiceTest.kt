@@ -8,13 +8,16 @@ import camilyed.github.io.currencyexchangeapi.testing.assertions.hasInitialBalan
 import camilyed.github.io.currencyexchangeapi.testing.assertions.hasOwner
 import camilyed.github.io.currencyexchangeapi.testing.builders.CreateAccountCommandBuilder
 import camilyed.github.io.currencyexchangeapi.testing.builders.CreateAccountCommandBuilder.Companion.anAccount
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
+import strikt.api.expectCatching
 import strikt.api.expectThat
+import strikt.assertions.isA
+import strikt.assertions.isEqualTo
+import strikt.assertions.isFailure
+import strikt.assertions.message
 import java.math.BigDecimal
 
-class AccountServiceTest: SetNextAccountIdAbility {
+class AccountServiceTest : SetNextAccountIdAbility {
 
     private val accountService = AccountService(accountRepository)
 
@@ -23,13 +26,12 @@ class AccountServiceTest: SetNextAccountIdAbility {
         // given
         theNextAccountIdWillBe("db59d3ba-5044-4ea9-85e2-aa1e67ec713c")
 
-        // and
-        val command = anAccount()
-            .withOwner("Jan Kowalski")
-            .withInitialBalance(BigDecimal(1000.0))
-
         // when
-        val account = createAccount(command)
+        val account = create(
+            anAccount()
+                .withOwner("Jan Kowalski")
+                .withInitialBalance(BigDecimal(1000.0))
+        )
 
         // then
         expectThat(account)
@@ -40,20 +42,19 @@ class AccountServiceTest: SetNextAccountIdAbility {
 
     @Test
     fun `should throw exception when trying to create account with negative balance`() {
-        // given
-        val command = anAccount()
-            .withInitialBalance(BigDecimal(-1000.0))
-
         // when
-        val exception = assertThrows<IllegalArgumentException> {
-            createAccount(command)
+        val result = expectCatching {
+            create(anAccount().withInitialBalance(BigDecimal(-1000.0)))
         }
 
-        // and
-        assertEquals("Initial balance cannot be negative", exception.message)
+        // then
+        result
+            .isFailure()
+            .isA<IllegalArgumentException>()
+            .message.isEqualTo("Initial balance cannot be negative")
     }
 
-    private fun createAccount(command: CreateAccountCommandBuilder): Account {
+    private fun create(command: CreateAccountCommandBuilder): Account {
         return accountService.create(command.build())
     }
 }

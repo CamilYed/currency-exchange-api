@@ -81,6 +81,20 @@ class AccountServiceTest : SetNextAccountIdAbility {
             .hasBalanceInUsd("100.00")
     }
 
+    @Test
+    fun `should not allow exchange of 0 PLN to USD`() {
+        // given
+        val account = create(anAccount().withInitialBalance("1000.00"))
+        val exchangeRate = BigDecimal(4.0)
+
+        // then
+        expectCatching {
+            accountService.exchangePlnToUsd(account.id, BigDecimal(0.0), exchangeRate)
+        }.isFailure()
+            .isA<IllegalArgumentException>()
+            .message.isEqualTo("Amount must be greater than 0")
+    }
+
     private fun create(command: CreateAccountCommandBuilder): AccountSnapshot {
         return accountService.create(command.build())
     }

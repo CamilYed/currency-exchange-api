@@ -14,6 +14,8 @@ class Account(
     init {
         require(balancePln >= BigDecimal.ZERO) { "Initial balance cannot be negative" }
         require(balanceUsd == BigDecimal.ZERO) { "USD balance must start at 0" }
+        balancePln = balancePln.setScale(2)
+        balanceUsd = balanceUsd.setScale(2)
     }
 
     fun exchangePlnToUsd(amountPln: BigDecimal, exchangeRate: BigDecimal) {

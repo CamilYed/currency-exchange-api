@@ -31,21 +31,21 @@ class AccountServiceTest : SetNextAccountIdAbility {
         val account = create(
             anAccount()
                 .withOwner("Jan Kowalski")
-                .withInitialBalance(BigDecimal(1000.0))
+                .withInitialBalance("1000.00")
         )
 
         // then
         expectThat(account)
             .hasId("db59d3ba-5044-4ea9-85e2-aa1e67ec713c")
             .hasOwner("Jan Kowalski")
-            .hasBalanceInPln(1000.0)
+            .hasBalanceInPln("1000.00")
     }
 
     @Test
     fun `should throw exception when trying to create account with negative balance`() {
         // when
         val result = expectCatching {
-            create(anAccount().withInitialBalance(BigDecimal(-1000.0)))
+            create(anAccount().withInitialBalance("-1000.00"))
         }
 
         // then
@@ -58,18 +58,18 @@ class AccountServiceTest : SetNextAccountIdAbility {
     @Test
     fun `should have zero USD balance before exchange`() {
         // given
-        val account = create(anAccount().withInitialBalance(BigDecimal(1000.0)))
+        val account = create(anAccount().withInitialBalance("1000.00"))
 
         // then
         expectThat(account)
-            .hasBalanceInPln(1000.0)
-            .hasBalanceInUsd("0")
+            .hasBalanceInPln("1000.00")
+            .hasBalanceInUsd("0.00")
     }
 
     @Test
     fun `should exchange PLN to USD`() {
         // given
-        var account = create(anAccount().withInitialBalance(BigDecimal(1000.00)))
+        var account = create(anAccount().withInitialBalance("1000.00"))
         val exchangeRate = BigDecimal(4.0) // 1 USD = 4 PLN
 
         // when
@@ -77,7 +77,7 @@ class AccountServiceTest : SetNextAccountIdAbility {
 
         // then
         expectThat(account)
-            .hasBalanceInPln(600.00)
+            .hasBalanceInPln("600.00")
             .hasBalanceInUsd("100.00")
     }
 

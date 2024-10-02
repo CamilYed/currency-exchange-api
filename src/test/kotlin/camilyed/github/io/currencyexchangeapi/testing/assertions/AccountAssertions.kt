@@ -1,6 +1,5 @@
 package camilyed.github.io.currencyexchangeapi.testing.assertions
 
-import camilyed.github.io.currencyexchangeapi.domain.Account
 import camilyed.github.io.currencyexchangeapi.domain.AccountSnapshot
 import strikt.api.Assertion
 import java.math.BigDecimal
@@ -19,7 +18,7 @@ fun Assertion.Builder<AccountSnapshot>.hasOwner(expectedOwner: String) =
         if (it.owner == expectedOwner) pass() else fail()
     }
 
-fun Assertion.Builder<AccountSnapshot>.hasBalanceInPln(expectedBalance: Double) =
+fun Assertion.Builder<AccountSnapshot>.hasBalanceInPln(expectedBalance: String) =
     assert("has initial balance $expectedBalance") {
         if (it.balancePln == BigDecimal(expectedBalance)) pass() else fail(
             description = "in fact it is %s",

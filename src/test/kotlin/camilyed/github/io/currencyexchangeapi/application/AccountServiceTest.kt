@@ -1,12 +1,14 @@
 package camilyed.github.io.currencyexchangeapi.application
 
 import camilyed.github.io.currencyexchangeapi.domain.Account
-import camilyed.github.io.currencyexchangeapi.testing.CreateAccountCommandBuilder
-import camilyed.github.io.currencyexchangeapi.testing.CreateAccountCommandBuilder.Companion.anAccount
+import camilyed.github.io.currencyexchangeapi.testing.assertions.hasInitialBalance
+import camilyed.github.io.currencyexchangeapi.testing.assertions.hasOwner
+import camilyed.github.io.currencyexchangeapi.testing.builders.CreateAccountCommandBuilder
+import camilyed.github.io.currencyexchangeapi.testing.builders.CreateAccountCommandBuilder.Companion.anAccount
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import strikt.api.expectThat
 import java.math.BigDecimal
 
 class AccountServiceTest {
@@ -24,9 +26,9 @@ class AccountServiceTest {
         val account = createAccount(command)
 
         // then
-        assertNotNull(account.id, "Account ID should not be null")
-        assertEquals(BigDecimal(1000.0), account.balancePln, "Account balance in PLN should match initial balance")
-        assertEquals("Jan Kowalski", account.owner, "Account owner name should match provided name")
+        expectThat(account)
+            .hasOwner("Jan Kowalski")
+            .hasInitialBalance(1000.0)
     }
 
     @Test

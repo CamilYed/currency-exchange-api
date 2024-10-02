@@ -1,4 +1,4 @@
-package camilyed.github.io.currencyexchangeapi.testing
+package camilyed.github.io.currencyexchangeapi.testing.builders
 
 import camilyed.github.io.currencyexchangeapi.application.CreateAccountCommand
 import java.math.BigDecimal

@@ -6,7 +6,8 @@ import java.util.UUID
 data class Account(
     val id: UUID,
     val owner: String,
-    val balancePln: BigDecimal
+    val balancePln: BigDecimal,
+    val balanceUsd: BigDecimal
 ) {
 
     init {

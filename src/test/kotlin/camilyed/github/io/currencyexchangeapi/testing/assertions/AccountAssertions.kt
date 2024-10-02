@@ -18,9 +18,17 @@ fun Assertion.Builder<Account>.hasOwner(expectedOwner: String) =
         if (it.owner == expectedOwner) pass() else fail()
     }
 
-fun Assertion.Builder<Account>.hasInitialBalance(expectedBalance: Double) =
+fun Assertion.Builder<Account>.hasBalanceInPln(expectedBalance: Double) =
     assert("has initial balance $expectedBalance") {
         if (it.balancePln == BigDecimal(expectedBalance)) pass() else fail(
+            description = "in fact it is %s",
+            actual = it.balancePln
+        )
+    }
+
+fun Assertion.Builder<Account>.hasBalanceInUsd(expectedBalance: Double) =
+    assert("has balance in usd $expectedBalance") {
+        if (it.balanceUsd == BigDecimal(expectedBalance)) pass() else fail(
             description = "in fact it is %s",
             actual = it.balancePln
         )

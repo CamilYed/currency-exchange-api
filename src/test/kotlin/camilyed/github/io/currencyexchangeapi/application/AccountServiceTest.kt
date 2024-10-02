@@ -3,8 +3,9 @@ package camilyed.github.io.currencyexchangeapi.application
 import camilyed.github.io.currencyexchangeapi.domain.Account
 import camilyed.github.io.currencyexchangeapi.testing.ability.SetNextAccountIdAbility
 import camilyed.github.io.currencyexchangeapi.testing.ability.SetNextAccountIdAbility.Companion.accountRepository
+import camilyed.github.io.currencyexchangeapi.testing.assertions.hasBalanceInUsd
 import camilyed.github.io.currencyexchangeapi.testing.assertions.hasId
-import camilyed.github.io.currencyexchangeapi.testing.assertions.hasInitialBalance
+import camilyed.github.io.currencyexchangeapi.testing.assertions.hasBalanceInPln
 import camilyed.github.io.currencyexchangeapi.testing.assertions.hasOwner
 import camilyed.github.io.currencyexchangeapi.testing.builders.CreateAccountCommandBuilder
 import camilyed.github.io.currencyexchangeapi.testing.builders.CreateAccountCommandBuilder.Companion.anAccount
@@ -37,7 +38,7 @@ class AccountServiceTest : SetNextAccountIdAbility {
         expectThat(account)
             .hasId("db59d3ba-5044-4ea9-85e2-aa1e67ec713c")
             .hasOwner("Jan Kowalski")
-            .hasInitialBalance(1000.0)
+            .hasBalanceInPln(1000.0)
     }
 
     @Test
@@ -61,7 +62,8 @@ class AccountServiceTest : SetNextAccountIdAbility {
 
         // then
         expectThat(account)
-            .balanceUsd.isEqualTo(BigDecimal.ZERO)
+            .hasBalanceInPln(1000.0)
+            .hasBalanceInUsd(0.0)
     }
 
     private fun create(command: CreateAccountCommandBuilder): Account {

@@ -1,11 +1,18 @@
 package camilyed.github.io.currencyexchangeapi.application
 
 import camilyed.github.io.currencyexchangeapi.domain.Account
-import java.util.*
+import camilyed.github.io.currencyexchangeapi.domain.AccountRepository
 
-class AccountService {
+class AccountService(
+    private val repository: AccountRepository
+) {
 
     fun create(command: CreateAccountCommand): Account {
-        return Account(id = UUID.randomUUID(), owner = command.owner, balancePln = command.initialBalance)
+        val id = repository.nextAccountId()
+        return Account(
+            id = id,
+            owner = command.owner,
+            balancePln = command.initialBalance
+        )
     }
 }

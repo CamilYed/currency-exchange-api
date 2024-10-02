@@ -25,6 +25,13 @@ class Account(
         balanceUsd = balanceUsd.add(amountUsd)
     }
 
+    fun exchangeUsdToPln(amountUsd: BigDecimal, exchangeRate: BigDecimal) {
+        require(amountUsd > BigDecimal.ZERO) { "Amount must be greater than 0" }
+        val amountPln = amountUsd.multiply(exchangeRate).setScale(2, RoundingMode.HALF_EVEN)
+        balanceUsd = balanceUsd.subtract(amountUsd)
+        balancePln = balancePln.add(amountPln)
+    }
+
     fun toSnapshot(): AccountSnapshot {
         return AccountSnapshot(
             id = id,

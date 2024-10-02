@@ -1,10 +1,10 @@
 package camilyed.github.io.currencyexchangeapi.testing.builders
 
-import camilyed.github.io.currencyexchangeapi.application.ExchangePlnToUsdCommand
+import camilyed.github.io.currencyexchangeapi.application.ExchangeUsdToPlnCommand
 import java.math.BigDecimal
 import java.util.*
 
-class ExchangePlnToUsdCommandBuilder private constructor() {
+class ExchangeUsdToPlnCommandBuilder private constructor() {
     private var accountId: UUID = UUID.randomUUID()
     private var amount: BigDecimal = BigDecimal("100.00")
     private var exchangeRate: BigDecimal = BigDecimal("4.0")
@@ -13,8 +13,8 @@ class ExchangePlnToUsdCommandBuilder private constructor() {
     fun withAmount(amount: String) = apply { this.amount = BigDecimal(amount) }
     fun withExchangeRate(exchangeRate: String) = apply { this.exchangeRate = BigDecimal(exchangeRate) }
 
-    fun build(): ExchangePlnToUsdCommand {
-        return ExchangePlnToUsdCommand(
+    fun build(): ExchangeUsdToPlnCommand {
+        return ExchangeUsdToPlnCommand(
             accountId = accountId,
             amount = amount,
             exchangeRate = exchangeRate
@@ -22,8 +22,8 @@ class ExchangePlnToUsdCommandBuilder private constructor() {
     }
 
     companion object {
-        fun anExchangeToUsd(): ExchangePlnToUsdCommandBuilder {
-            return ExchangePlnToUsdCommandBuilder()
+        fun anExchangeToPln(): ExchangeUsdToPlnCommandBuilder {
+            return ExchangeUsdToPlnCommandBuilder()
         }
     }
 }

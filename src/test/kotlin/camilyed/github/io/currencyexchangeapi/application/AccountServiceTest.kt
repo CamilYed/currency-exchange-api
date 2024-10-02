@@ -10,7 +10,9 @@ import camilyed.github.io.currencyexchangeapi.testing.assertions.hasOwner
 import camilyed.github.io.currencyexchangeapi.testing.builders.CreateAccountCommandBuilder
 import camilyed.github.io.currencyexchangeapi.testing.builders.CreateAccountCommandBuilder.Companion.anAccount
 import camilyed.github.io.currencyexchangeapi.testing.builders.ExchangePlnToUsdCommandBuilder
-import camilyed.github.io.currencyexchangeapi.testing.builders.ExchangePlnToUsdCommandBuilder.Companion.anExchange
+import camilyed.github.io.currencyexchangeapi.testing.builders.ExchangePlnToUsdCommandBuilder.Companion.anExchangeToUsd
+import camilyed.github.io.currencyexchangeapi.testing.builders.ExchangeUsdToPlnCommandBuilder
+import camilyed.github.io.currencyexchangeapi.testing.builders.ExchangeUsdToPlnCommandBuilder.Companion.anExchangeToPln
 import camilyed.github.io.currencyexchangeapi.testing.fakes.TestingAccountRepository
 import org.junit.jupiter.api.Test
 import strikt.api.expectCatching
@@ -77,7 +79,7 @@ class AccountServiceTest : SetNextAccountIdAbility, CreateAccountAbility {
 
         // when
         account = exchangePlnToUsd(
-            anExchange()
+            anExchangeToUsd()
                 .withAccountId(account.id)
                 .withAmount("400.00")
                 .withExchangeRate("4.0")
@@ -97,7 +99,7 @@ class AccountServiceTest : SetNextAccountIdAbility, CreateAccountAbility {
         // then
         expectCatching {
             exchangePlnToUsd(
-                anExchange()
+                anExchangeToUsd()
                     .withAccountId(account.id)
                     .withAmount("0.00")
             )
@@ -113,7 +115,7 @@ class AccountServiceTest : SetNextAccountIdAbility, CreateAccountAbility {
 
         // and
         account = exchangePlnToUsd(
-            anExchange()
+            anExchangeToUsd()
                 .withAccountId(account.id)
                 .withAmount("400.00")
                 .withExchangeRate("4.0")
@@ -121,7 +123,7 @@ class AccountServiceTest : SetNextAccountIdAbility, CreateAccountAbility {
 
         // when
         account = exchangeUsdToPln(
-            anExchange()
+            anExchangeToPln()
                 .withAccountId(account.id)
                 .withAmount("100.00")
                 .withExchangeRate("4.0")
@@ -129,8 +131,8 @@ class AccountServiceTest : SetNextAccountIdAbility, CreateAccountAbility {
 
         // then
         expectThat(account)
-            .hasBalanceInPln("1000.00") // Powrót do stanu początkowego
-            .hasBalanceInUsd("0.00")    // Saldo USD powinno być teraz zerowe
+            .hasBalanceInPln("1000.00")
+            .hasBalanceInUsd("0.00")
     }
 
     private fun create(command: CreateAccountCommandBuilder): AccountSnapshot {
@@ -139,5 +141,9 @@ class AccountServiceTest : SetNextAccountIdAbility, CreateAccountAbility {
 
     private fun exchangePlnToUsd(command: ExchangePlnToUsdCommandBuilder): AccountSnapshot {
         return accountService.exchangePlnToUsd(command.build())
+    }
+
+    private fun exchangeUsdToPln(command: ExchangeUsdToPlnCommandBuilder): AccountSnapshot {
+        return accountService.exchangeUsdToPln(command.build())
     }
 }

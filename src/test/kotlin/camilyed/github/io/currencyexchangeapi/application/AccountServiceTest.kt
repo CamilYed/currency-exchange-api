@@ -1,6 +1,7 @@
 package camilyed.github.io.currencyexchangeapi.application
 
 import camilyed.github.io.currencyexchangeapi.domain.Account
+import camilyed.github.io.currencyexchangeapi.testing.assertions.hasId
 import camilyed.github.io.currencyexchangeapi.testing.assertions.hasInitialBalance
 import camilyed.github.io.currencyexchangeapi.testing.assertions.hasOwner
 import camilyed.github.io.currencyexchangeapi.testing.builders.CreateAccountCommandBuilder
@@ -27,6 +28,7 @@ class AccountServiceTest {
 
         // then
         expectThat(account)
+            .hasId("db59d3ba-5044-4ea9-85e2-aa1e67ec713c")
             .hasOwner("Jan Kowalski")
             .hasInitialBalance(1000.0)
     }

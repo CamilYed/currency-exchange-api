@@ -3,6 +3,15 @@ package camilyed.github.io.currencyexchangeapi.testing.assertions
 import camilyed.github.io.currencyexchangeapi.domain.Account
 import strikt.api.Assertion
 import java.math.BigDecimal
+import java.util.*
+
+fun Assertion.Builder<Account>.hasId(expectedId: String) =
+    assert("has id $expectedId") {
+        if (it.id == UUID.fromString(expectedId)) pass() else fail(
+            description = "in fact it is %s",
+            actual = it.id
+        )
+    }
 
 fun Assertion.Builder<Account>.hasOwner(expectedOwner: String) =
     assert("has owner $expectedOwner") {

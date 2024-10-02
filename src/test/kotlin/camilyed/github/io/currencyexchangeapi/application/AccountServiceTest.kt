@@ -106,6 +106,33 @@ class AccountServiceTest : SetNextAccountIdAbility, CreateAccountAbility {
             .message.isEqualTo("Amount must be greater than 0")
     }
 
+    @Test
+    fun `should exchange USD to PLN`() {
+        // given
+        var account = thereIsAnAccount(anAccount().withInitialBalance("1000.00"))
+
+        // and
+        account = exchangePlnToUsd(
+            anExchange()
+                .withAccountId(account.id)
+                .withAmount("400.00")
+                .withExchangeRate("4.0")
+        )
+
+        // when
+        account = exchangeUsdToPln(
+            anExchange()
+                .withAccountId(account.id)
+                .withAmount("100.00")
+                .withExchangeRate("4.0")
+        )
+
+        // then
+        expectThat(account)
+            .hasBalanceInPln("1000.00") // Powrót do stanu początkowego
+            .hasBalanceInUsd("0.00")    // Saldo USD powinno być teraz zerowe
+    }
+
     private fun create(command: CreateAccountCommandBuilder): AccountSnapshot {
         return accountService.create(command.build())
     }

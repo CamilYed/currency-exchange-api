@@ -66,6 +66,21 @@ class AccountServiceTest : SetNextAccountIdAbility {
             .hasBalanceInUsd(0.0)
     }
 
+    @Test
+    fun `should exchange PLN to USD`() {
+        // given
+        val account = create(anAccount().withInitialBalance(BigDecimal(1000.0)))
+        val exchangeRate = BigDecimal(4.0) // 1 USD = 4 PLN
+
+        // when
+        accountService.exchangePlnToUsd(account.id, BigDecimal(400.0), exchangeRate)
+
+        // then
+        expectThat(account)
+            .hasBalanceInPln(600.0)
+            .hasBalanceInUsd(100.0)
+    }
+
     private fun create(command: CreateAccountCommandBuilder): AccountSnapshot {
         return accountService.create(command.build())
     }

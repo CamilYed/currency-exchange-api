@@ -1,14 +1,17 @@
 package camilyed.github.io.currencyexchangeapi.application
 
 import camilyed.github.io.currencyexchangeapi.domain.AccountSnapshot
+import camilyed.github.io.currencyexchangeapi.testing.ability.CreateAccountAbility
 import camilyed.github.io.currencyexchangeapi.testing.ability.SetNextAccountIdAbility
-import camilyed.github.io.currencyexchangeapi.testing.ability.SetNextAccountIdAbility.Companion.accountRepository
 import camilyed.github.io.currencyexchangeapi.testing.assertions.hasBalanceInPln
 import camilyed.github.io.currencyexchangeapi.testing.assertions.hasBalanceInUsd
 import camilyed.github.io.currencyexchangeapi.testing.assertions.hasId
 import camilyed.github.io.currencyexchangeapi.testing.assertions.hasOwner
 import camilyed.github.io.currencyexchangeapi.testing.builders.CreateAccountCommandBuilder
 import camilyed.github.io.currencyexchangeapi.testing.builders.CreateAccountCommandBuilder.Companion.anAccount
+import camilyed.github.io.currencyexchangeapi.testing.builders.ExchangePlnToUsdCommandBuilder
+import camilyed.github.io.currencyexchangeapi.testing.builders.ExchangePlnToUsdCommandBuilder.Companion.anExchange
+import camilyed.github.io.currencyexchangeapi.testing.fakes.TestingAccountRepository
 import org.junit.jupiter.api.Test
 import strikt.api.expectCatching
 import strikt.api.expectThat
@@ -16,9 +19,10 @@ import strikt.assertions.isA
 import strikt.assertions.isEqualTo
 import strikt.assertions.isFailure
 import strikt.assertions.message
-import java.math.BigDecimal
 
-class AccountServiceTest : SetNextAccountIdAbility {
+class AccountServiceTest : SetNextAccountIdAbility, CreateAccountAbility {
+
+    override val accountRepository = TestingAccountRepository()
 
     private val accountService = AccountService(accountRepository)
 
@@ -69,11 +73,15 @@ class AccountServiceTest : SetNextAccountIdAbility {
     @Test
     fun `should exchange PLN to USD`() {
         // given
-        var account = create(anAccount().withInitialBalance("1000.00"))
-        val exchangeRate = BigDecimal(4.0) // 1 USD = 4 PLN
+        var account = thereIsAnAccount(anAccount().withInitialBalance("1000.00"))
 
         // when
-        account = accountService.exchangePlnToUsd(account.id, BigDecimal(400.00), exchangeRate)
+        account = exchangePlnToUsd(
+            anExchange()
+                .withAccountId(account.id)
+                .withAmount("400.00")
+                .withExchangeRate("4.0")
+        )
 
         // then
         expectThat(account)
@@ -84,12 +92,15 @@ class AccountServiceTest : SetNextAccountIdAbility {
     @Test
     fun `should not allow exchange of 0 PLN to USD`() {
         // given
-        val account = create(anAccount().withInitialBalance("1000.00"))
-        val exchangeRate = BigDecimal(4.0)
+        val account = thereIsAnAccount(anAccount())
 
         // then
         expectCatching {
-            accountService.exchangePlnToUsd(account.id, BigDecimal(0.0), exchangeRate)
+            exchangePlnToUsd(
+                anExchange()
+                    .withAccountId(account.id)
+                    .withAmount("0.00")
+            )
         }.isFailure()
             .isA<IllegalArgumentException>()
             .message.isEqualTo("Amount must be greater than 0")
@@ -97,5 +108,9 @@ class AccountServiceTest : SetNextAccountIdAbility {
 
     private fun create(command: CreateAccountCommandBuilder): AccountSnapshot {
         return accountService.create(command.build())
+    }
+
+    private fun exchangePlnToUsd(command: ExchangePlnToUsdCommandBuilder): AccountSnapshot {
+        return accountService.exchangePlnToUsd(command.build())
     }
 }

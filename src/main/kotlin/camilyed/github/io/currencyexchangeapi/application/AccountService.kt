@@ -22,9 +22,9 @@ class AccountService(
         return account.toSnapshot()
     }
 
-    fun exchangePlnToUsd(id: UUID, amount: BigDecimal, exchangeRate: BigDecimal): AccountSnapshot {
-        val account = repository.find(id)!!
-        account.exchangePlnToUsd(amountPln = amount, exchangeRate = exchangeRate)
+    fun exchangePlnToUsd(command: ExchangePlnToUsdCommand): AccountSnapshot {
+        val account = repository.find(command.accountId)!!
+        account.exchangePlnToUsd(amountPln = command.amount, exchangeRate = command.exchangeRate)
         return account.toSnapshot()
     }
 }

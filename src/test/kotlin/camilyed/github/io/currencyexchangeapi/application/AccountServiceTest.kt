@@ -63,22 +63,22 @@ class AccountServiceTest : SetNextAccountIdAbility {
         // then
         expectThat(account)
             .hasBalanceInPln(1000.0)
-            .hasBalanceInUsd(0.0)
+            .hasBalanceInUsd("0")
     }
 
     @Test
     fun `should exchange PLN to USD`() {
         // given
-        val account = create(anAccount().withInitialBalance(BigDecimal(1000.0)))
+        var account = create(anAccount().withInitialBalance(BigDecimal(1000.00)))
         val exchangeRate = BigDecimal(4.0) // 1 USD = 4 PLN
 
         // when
-        accountService.exchangePlnToUsd(account.id, BigDecimal(400.0), exchangeRate)
+        account = accountService.exchangePlnToUsd(account.id, BigDecimal(400.00), exchangeRate)
 
         // then
         expectThat(account)
-            .hasBalanceInPln(600.0)
-            .hasBalanceInUsd(100.0)
+            .hasBalanceInPln(600.00)
+            .hasBalanceInUsd("100.00")
     }
 
     private fun create(command: CreateAccountCommandBuilder): AccountSnapshot {

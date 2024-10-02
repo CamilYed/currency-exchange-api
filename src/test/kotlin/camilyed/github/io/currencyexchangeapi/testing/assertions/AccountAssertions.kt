@@ -27,10 +27,10 @@ fun Assertion.Builder<AccountSnapshot>.hasBalanceInPln(expectedBalance: Double) 
         )
     }
 
-fun Assertion.Builder<AccountSnapshot>.hasBalanceInUsd(expectedBalance: Double) =
+fun Assertion.Builder<AccountSnapshot>.hasBalanceInUsd(expectedBalance: String) =
     assert("has balance in usd $expectedBalance") {
         if (it.balanceUsd == BigDecimal(expectedBalance)) pass() else fail(
             description = "in fact it is %s",
-            actual = it.balancePln
+            actual = it.balanceUsd
         )
     }

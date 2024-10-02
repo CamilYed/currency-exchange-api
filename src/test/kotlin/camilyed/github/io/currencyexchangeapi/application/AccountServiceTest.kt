@@ -1,11 +1,11 @@
 package camilyed.github.io.currencyexchangeapi.application
 
-import camilyed.github.io.currencyexchangeapi.domain.Account
+import camilyed.github.io.currencyexchangeapi.domain.AccountSnapshot
 import camilyed.github.io.currencyexchangeapi.testing.ability.SetNextAccountIdAbility
 import camilyed.github.io.currencyexchangeapi.testing.ability.SetNextAccountIdAbility.Companion.accountRepository
+import camilyed.github.io.currencyexchangeapi.testing.assertions.hasBalanceInPln
 import camilyed.github.io.currencyexchangeapi.testing.assertions.hasBalanceInUsd
 import camilyed.github.io.currencyexchangeapi.testing.assertions.hasId
-import camilyed.github.io.currencyexchangeapi.testing.assertions.hasBalanceInPln
 import camilyed.github.io.currencyexchangeapi.testing.assertions.hasOwner
 import camilyed.github.io.currencyexchangeapi.testing.builders.CreateAccountCommandBuilder
 import camilyed.github.io.currencyexchangeapi.testing.builders.CreateAccountCommandBuilder.Companion.anAccount
@@ -66,7 +66,7 @@ class AccountServiceTest : SetNextAccountIdAbility {
             .hasBalanceInUsd(0.0)
     }
 
-    private fun create(command: CreateAccountCommandBuilder): Account {
+    private fun create(command: CreateAccountCommandBuilder): AccountSnapshot {
         return accountService.create(command.build())
     }
 }

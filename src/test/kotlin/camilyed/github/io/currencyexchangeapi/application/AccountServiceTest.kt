@@ -54,6 +54,16 @@ class AccountServiceTest : SetNextAccountIdAbility {
             .message.isEqualTo("Initial balance cannot be negative")
     }
 
+    @Test
+    fun `should have zero USD balance before exchange`() {
+        // given
+        val account = create(anAccount().withInitialBalance(BigDecimal(1000.0)))
+
+        // then
+        expectThat(account)
+            .balanceUsd.isEqualTo(BigDecimal.ZERO)
+    }
+
     private fun create(command: CreateAccountCommandBuilder): Account {
         return accountService.create(command.build())
     }

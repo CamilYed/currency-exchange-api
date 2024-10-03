@@ -6,6 +6,7 @@ import camilyed.github.io.currencyexchangeapi.domain.InsufficientFundsException
 import camilyed.github.io.currencyexchangeapi.domain.InvalidAmountException
 import camilyed.github.io.currencyexchangeapi.domain.InvalidExchangeRateException
 import camilyed.github.io.currencyexchangeapi.testing.ability.CreateAccountAbility
+import camilyed.github.io.currencyexchangeapi.testing.ability.GetCurrentExchangeRateAbility
 import camilyed.github.io.currencyexchangeapi.testing.ability.SetNextAccountIdAbility
 import camilyed.github.io.currencyexchangeapi.testing.assertions.hasBalanceInPln
 import camilyed.github.io.currencyexchangeapi.testing.assertions.hasBalanceInUsd
@@ -19,6 +20,8 @@ import camilyed.github.io.currencyexchangeapi.testing.builders.ExchangePlnToUsdC
 import camilyed.github.io.currencyexchangeapi.testing.builders.ExchangeUsdToPlnCommandBuilder
 import camilyed.github.io.currencyexchangeapi.testing.builders.ExchangeUsdToPlnCommandBuilder.Companion.anExchangeToPln
 import camilyed.github.io.currencyexchangeapi.testing.fakes.TestingAccountRepository
+import camilyed.github.io.currencyexchangeapi.testing.fakes.TestingCurrentExchangeRateProvider
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import strikt.api.expectCatching
 import strikt.api.expectThat
@@ -28,9 +31,19 @@ import strikt.assertions.isFailure
 import strikt.assertions.message
 import java.util.UUID
 
-class AccountServiceTest : SetNextAccountIdAbility, CreateAccountAbility {
+class AccountServiceTest :
+    SetNextAccountIdAbility,
+    CreateAccountAbility,
+    GetCurrentExchangeRateAbility {
     override val accountRepository = TestingAccountRepository()
-    private val accountService = AccountService(accountRepository)
+    override val exchangeRateProvider = TestingCurrentExchangeRateProvider()
+
+    private val accountService = AccountService(accountRepository, exchangeRateProvider)
+
+    @BeforeEach
+    fun setup() {
+        currentExchangeRateIs("4.00")
+    }
 
     @Test
     fun `should create a new account with valid details`() {
@@ -115,13 +128,15 @@ class AccountServiceTest : SetNextAccountIdAbility, CreateAccountAbility {
         // given
         var account = thereIsAnAccount(anAccount().withBalancePln("1000.00"))
 
+        // and
+        currentExchangeRateIs("4.0")
+
         // when
         account =
             exchange(
                 anExchangeToUsd()
                     .withAccountId(account.id)
-                    .withAmount("400.00")
-                    .withExchangeRate("4.0"),
+                    .withAmount("400.00"),
             )
 
         // then
@@ -174,13 +189,15 @@ class AccountServiceTest : SetNextAccountIdAbility, CreateAccountAbility {
                     .withBalanceUsd("100.00"),
             )
 
+        // and
+        currentExchangeRateIs("4.0")
+
         // when
         account =
             exchange(
                 anExchangeToPln()
                     .withAccountId(account.id)
-                    .withAmount("100.00")
-                    .withExchangeRate("4.0"),
+                    .withAmount("100.00"),
             )
 
         // then
@@ -262,13 +279,15 @@ class AccountServiceTest : SetNextAccountIdAbility, CreateAccountAbility {
         // given
         val account = thereIsAnAccount(anAccount().withBalancePln("1000.00").withBalanceUsd("0.00"))
 
+        // and
+        currentExchangeRateIs("4.0")
+
         // when
         val updatedAccount =
             exchange(
                 anExchangeToUsd()
                     .withAccountId(account.id)
-                    .withAmount("1000.00")
-                    .withExchangeRate("4.0"),
+                    .withAmount("1000.00"),
             )
 
         // then
@@ -282,13 +301,15 @@ class AccountServiceTest : SetNextAccountIdAbility, CreateAccountAbility {
         // given
         val account = thereIsAnAccount(anAccount().withBalanceUsd("100.00").withBalancePln("0.00"))
 
+        // and
+        currentExchangeRateIs("4.0")
+
         // when
         val updatedAccount =
             exchange(
                 anExchangeToPln()
                     .withAccountId(account.id)
-                    .withAmount("100.00")
-                    .withExchangeRate("4.0"),
+                    .withAmount("100.00"),
             )
 
         // then
@@ -300,15 +321,11 @@ class AccountServiceTest : SetNextAccountIdAbility, CreateAccountAbility {
     @Test
     fun `should throw exception for zero exchange rate`() {
         // given
-        val account = thereIsAnAccount(anAccount())
+        thereIsAnAccount(anAccount())
 
-        // then
+        // and
         expectCatching {
-            exchange(
-                anExchangeToUsd()
-                    .withAccountId(account.id)
-                    .withExchangeRate("0.00"),
-            )
+            currentExchangeRateIs("0.0")
         }.isFailure()
             .isA<InvalidExchangeRateException>()
             .message.isEqualTo("Exchange rate must be greater than 0")
@@ -319,13 +336,15 @@ class AccountServiceTest : SetNextAccountIdAbility, CreateAccountAbility {
         // given
         val account = thereIsAnAccount(anAccount().withBalancePln("1000.00"))
 
+        // and
+        currentExchangeRateIs("4.0")
+
         // when
         val updatedAccount =
             exchange(
                 anExchangeToUsd()
                     .withAccountId(account.id)
-                    .withAmount("123.456")
-                    .withExchangeRate("4.0"),
+                    .withAmount("123.456"),
             )
 
         // then
@@ -339,13 +358,15 @@ class AccountServiceTest : SetNextAccountIdAbility, CreateAccountAbility {
         // given
         val account = thereIsAnAccount(anAccount().withBalanceUsd("100.00").withBalancePln("0.00"))
 
+        // and
+        currentExchangeRateIs("4.0")
+
         // when
         val updatedAccount =
             exchange(
                 anExchangeToPln()
                     .withAccountId(account.id)
-                    .withAmount("33.335")
-                    .withExchangeRate("4.0"),
+                    .withAmount("33.335"),
             )
 
         // then
@@ -359,13 +380,15 @@ class AccountServiceTest : SetNextAccountIdAbility, CreateAccountAbility {
         // given
         val account = thereIsAnAccount(anAccount().withBalancePln("1000.00"))
 
+        // and
+        currentExchangeRateIs("3.33")
+
         // when
         val updatedAccount =
             exchange(
                 anExchangeToUsd()
                     .withAccountId(account.id)
-                    .withAmount("1000.00")
-                    .withExchangeRate("3.33"),
+                    .withAmount("1000.00"),
             )
 
         // then
@@ -379,13 +402,15 @@ class AccountServiceTest : SetNextAccountIdAbility, CreateAccountAbility {
         // given
         val account = thereIsAnAccount(anAccount().withBalanceUsd("100.00").withBalancePln("0.00"))
 
+        // and
+        currentExchangeRateIs("4.5")
+
         // when
         val updatedAccount =
             exchange(
                 anExchangeToPln()
                     .withAccountId(account.id)
-                    .withAmount("100.00")
-                    .withExchangeRate("4.5"),
+                    .withAmount("100.00"),
             )
 
         // then

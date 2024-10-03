@@ -6,5 +6,4 @@ import java.util.UUID
 data class ExchangePlnToUsdCommand(
     val accountId: UUID,
     val amount: BigDecimal,
-    val exchangeRate: BigDecimal,
 )

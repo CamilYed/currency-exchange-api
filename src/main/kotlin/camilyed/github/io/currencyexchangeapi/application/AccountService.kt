@@ -3,6 +3,7 @@ package camilyed.github.io.currencyexchangeapi.application
 import camilyed.github.io.currencyexchangeapi.domain.Account
 import camilyed.github.io.currencyexchangeapi.domain.AccountRepository
 import camilyed.github.io.currencyexchangeapi.domain.AccountSnapshot
+import camilyed.github.io.currencyexchangeapi.domain.ExchangeRate
 import java.math.BigDecimal
 
 class AccountService(
@@ -23,13 +24,13 @@ class AccountService(
 
     fun exchangePlnToUsd(command: ExchangePlnToUsdCommand): AccountSnapshot {
         val account = repository.find(command.accountId)!!
-        account.exchangePlnToUsd(amountPln = command.amount, exchangeRate = command.exchangeRate)
+        account.exchangePlnToUsd(command.amount,  ExchangeRate(command.exchangeRate))
         return account.toSnapshot()
     }
 
     fun exchangeUsdToPln(command: ExchangeUsdToPlnCommand): AccountSnapshot {
         val account = repository.find(command.accountId)!!
-        account.exchangeUsdToPln(amountUsd = command.amount, exchangeRate = command.exchangeRate)
+        account.exchangeUsdToPln(command.amount, ExchangeRate(command.exchangeRate))
         return account.toSnapshot()
     }
 }

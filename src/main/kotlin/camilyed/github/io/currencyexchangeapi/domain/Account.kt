@@ -17,18 +17,18 @@ class Account(
         balanceUsd = balanceUsd.setScale(2)
     }
 
-    fun exchangePlnToUsd(amountPln: BigDecimal, exchangeRate: BigDecimal) {
+    fun exchangePlnToUsd(amountPln: BigDecimal, exchangeRate: ExchangeRate) {
         require(amountPln > BigDecimal.ZERO) { "Amount must be greater than 0" }
         require(amountPln <= balancePln) { "Insufficient PLN balance" }
-        val amountUsd = amountPln.divide(exchangeRate, 2, RoundingMode.HALF_EVEN)
+        val amountUsd = exchangeRate.convertFromPln(amountPln)
         balancePln = balancePln.subtract(amountPln)
         balanceUsd = balanceUsd.add(amountUsd)
     }
 
-    fun exchangeUsdToPln(amountUsd: BigDecimal, exchangeRate: BigDecimal) {
+    fun exchangeUsdToPln(amountUsd: BigDecimal, exchangeRate: ExchangeRate) {
         require(amountUsd > BigDecimal.ZERO) { "Amount must be greater than 0" }
         require(amountUsd <= balanceUsd) { "Insufficient USD balance" }
-        val amountPln = amountUsd.multiply(exchangeRate).setScale(2, RoundingMode.HALF_EVEN)
+        val amountPln = exchangeRate.convertToPln(amountUsd)
         balanceUsd = balanceUsd.subtract(amountUsd)
         balancePln = balancePln.add(amountPln)
     }

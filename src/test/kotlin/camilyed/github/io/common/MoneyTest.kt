@@ -58,4 +58,16 @@ class MoneyTest {
         expectThat(result.amount).isEqualTo(BigDecimal("50.00"))
         expectThat(result.currency).isEqualTo("USD")
     }
+
+    @Test
+    fun `should throw exception when subtracting with insufficient funds`() {
+        val money1 = Money(BigDecimal("50.00"), "USD")
+        val money2 = Money(BigDecimal("100.00"), "USD")
+
+        expectCatching {
+            money1 - money2
+        }.isFailure()
+            .isA<IllegalArgumentException>()
+            .message.isEqualTo("Insufficient funds")
+    }
 }

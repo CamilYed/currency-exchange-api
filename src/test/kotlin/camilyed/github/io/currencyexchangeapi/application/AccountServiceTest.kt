@@ -254,6 +254,23 @@ class AccountServiceTest : SetNextAccountIdAbility, CreateAccountAbility {
             .hasBalanceInUsd("0.00")
     }
 
+    @Test
+    fun `should throw exception for zero exchange rate`() {
+        // given
+        val account = thereIsAnAccount(anAccount())
+
+        // then
+        expectCatching {
+            exchange(
+                anExchangeToUsd()
+                    .withAccountId(account.id)
+                    .withExchangeRate("0.00")
+            )
+        }.isFailure()
+            .isA<IllegalArgumentException>()
+            .message.isEqualTo("Exchange rate must be greater than 0")
+    }
+
     private fun create(command: CreateAccountCommandBuilder): AccountSnapshot {
         return accountService.create(command.build())
     }

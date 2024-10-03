@@ -25,6 +25,7 @@ import strikt.assertions.isA
 import strikt.assertions.isEqualTo
 import strikt.assertions.isFailure
 import strikt.assertions.message
+import java.util.*
 
 class AccountServiceTest : SetNextAccountIdAbility, CreateAccountAbility {
 
@@ -73,6 +74,24 @@ class AccountServiceTest : SetNextAccountIdAbility, CreateAccountAbility {
         expectThat(account)
             .hasBalanceInPln("1000.00")
             .hasBalanceInUsd("0.00")
+    }
+
+    @Test
+    fun `should throw AccountNotFoundException if account does not exist`() {
+        // given
+        val nonExistentAccountId = UUID.randomUUID()
+
+        // when - then
+        expectCatching {
+            exchange(
+                anExchangeToUsd()
+                    .withAccountId(nonExistentAccountId)
+                    .withAmount("100.00")
+                    .withExchangeRate("4.0")
+            )
+        }.isFailure()
+            .isA<AccountNotFoundException>()
+            .message.isEqualTo("Account with id $nonExistentAccountId not found")
     }
 
     @Test

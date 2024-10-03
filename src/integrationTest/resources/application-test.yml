@@ -1,0 +1,8 @@
+nbp:
+    url: http://localhost:${wiremock.server.port}/api/exchangerates/rates/A/USD
+
+spring:
+    datasource:
+        url: jdbc:postgresql://localhost:5432/currency_exchange_db
+        username: myuser
+        password: mypassword

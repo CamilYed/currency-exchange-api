@@ -2,7 +2,7 @@ package camilyed.github.io.currencyexchangeapi.testing.fakes
 
 import camilyed.github.io.currencyexchangeapi.domain.Account
 import camilyed.github.io.currencyexchangeapi.domain.AccountRepository
-import java.util.*
+import java.util.UUID
 
 class TestingAccountRepository : AccountRepository {
     private val accounts = mutableMapOf<UUID, Account>()

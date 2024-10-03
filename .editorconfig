@@ -1,0 +1,18 @@
+root = true
+
+[*]
+indent_style = space
+indent_size = 4
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+
+[*.kt]
+max_line_length = 100
+disabled_rules = no-wildcard-imports
+
+[*.{kt,kts}]
+import_order = camelcase, spaces, semicolons
+
+[*.kt]
+ij_kotlin_packages_to_use_import_on_demand = emptyList()

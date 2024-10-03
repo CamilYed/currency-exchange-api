@@ -11,12 +11,13 @@ interface CreateAccountAbility {
 
     fun thereIsAnAccount(builder: AccountSnapshotBuilder): AccountSnapshot {
         val snapshot = builder.build()
-        val account = Account(
-            id = snapshot.id,
-            owner = snapshot.owner,
-            balancePln = Money.pln(snapshot.balancePln),
-            balanceUsd = Money.usd(snapshot.balanceUsd)
-        )
+        val account =
+            Account(
+                id = snapshot.id,
+                owner = snapshot.owner,
+                balancePln = Money.pln(snapshot.balancePln),
+                balanceUsd = Money.usd(snapshot.balanceUsd),
+            )
         accountRepository.save(account)
         return account.toSnapshot()
     }

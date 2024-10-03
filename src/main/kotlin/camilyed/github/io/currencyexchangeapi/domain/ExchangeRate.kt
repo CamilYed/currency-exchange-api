@@ -4,7 +4,6 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 
 data class ExchangeRate(val rate: BigDecimal) {
-
     init {
         if (rate <= BigDecimal.ZERO) {
             throw InvalidExchangeRateException("Exchange rate must be greater than 0")

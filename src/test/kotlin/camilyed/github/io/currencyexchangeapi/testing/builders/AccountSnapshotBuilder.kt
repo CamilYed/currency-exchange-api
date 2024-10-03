@@ -2,7 +2,7 @@ package camilyed.github.io.currencyexchangeapi.testing.builders
 
 import camilyed.github.io.currencyexchangeapi.domain.AccountSnapshot
 import java.math.BigDecimal
-import java.util.*
+import java.util.UUID
 
 class AccountSnapshotBuilder private constructor() {
     private var id: UUID = UUID.randomUUID()
@@ -11,16 +11,20 @@ class AccountSnapshotBuilder private constructor() {
     private var balanceUsd: BigDecimal = BigDecimal.ZERO
 
     fun withId(id: UUID) = apply { this.id = id }
+
     fun withOwner(owner: String) = apply { this.owner = owner }
+
     fun withBalancePln(balance: String) = apply { this.balancePln = BigDecimal(balance) }
+
     fun withBalanceUsd(balance: String) = apply { this.balanceUsd = BigDecimal(balance) }
 
-    fun build(): AccountSnapshot = AccountSnapshot(
-        id = id,
-        owner = owner,
-        balancePln = balancePln,
-        balanceUsd = balanceUsd
-    )
+    fun build(): AccountSnapshot =
+        AccountSnapshot(
+            id = id,
+            owner = owner,
+            balancePln = balancePln,
+            balanceUsd = balanceUsd,
+        )
 
     companion object {
         fun anAccount(): AccountSnapshotBuilder {

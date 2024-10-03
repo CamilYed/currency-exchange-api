@@ -1,5 +1,6 @@
 package camilyed.github.io.currencyexchangeapi.application
 
+import camilyed.github.io.common.Money
 import camilyed.github.io.currencyexchangeapi.domain.Account
 import camilyed.github.io.currencyexchangeapi.domain.AccountRepository
 import camilyed.github.io.currencyexchangeapi.domain.AccountSnapshot
@@ -15,8 +16,8 @@ class AccountService(
         val account = Account(
             id = id,
             owner = command.owner,
-            balancePln = command.initialBalance,
-            balanceUsd = BigDecimal.ZERO
+            balancePln = Money.pln(command.initialBalance),
+            balanceUsd = Money.usd(BigDecimal.ZERO)
         )
         repository.save(account)
         return account.toSnapshot()
@@ -24,13 +25,13 @@ class AccountService(
 
     fun exchangePlnToUsd(command: ExchangePlnToUsdCommand): AccountSnapshot {
         val account = repository.find(command.accountId)!!
-        account.exchangePlnToUsd(command.amount,  ExchangeRate(command.exchangeRate))
+        account.exchangePlnToUsd(Money.pln(command.amount),  ExchangeRate(command.exchangeRate))
         return account.toSnapshot()
     }
 
     fun exchangeUsdToPln(command: ExchangeUsdToPlnCommand): AccountSnapshot {
         val account = repository.find(command.accountId)!!
-        account.exchangeUsdToPln(command.amount, ExchangeRate(command.exchangeRate))
+        account.exchangeUsdToPln(Money.usd(command.amount), ExchangeRate(command.exchangeRate))
         return account.toSnapshot()
     }
 }

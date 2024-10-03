@@ -58,7 +58,7 @@ class AccountServiceTest : SetNextAccountIdAbility, CreateAccountAbility {
         result
             .isFailure()
             .isA<IllegalArgumentException>()
-            .message.isEqualTo("Initial balance cannot be negative")
+            .message.isEqualTo("Money amount must be greater than or equal to zero")
     }
 
     @Test
@@ -122,7 +122,7 @@ class AccountServiceTest : SetNextAccountIdAbility, CreateAccountAbility {
             )
         }.isFailure()
             .isA<IllegalArgumentException>()
-            .message.isEqualTo("Amount must be greater than 0")
+            .message.isEqualTo("Money amount must be greater than or equal to zero")
     }
 
     @Test
@@ -179,7 +179,7 @@ class AccountServiceTest : SetNextAccountIdAbility, CreateAccountAbility {
             )
         }.isFailure()
             .isA<IllegalArgumentException>()
-            .message.isEqualTo("Amount must be greater than 0")
+            .message.isEqualTo("Money amount must be greater than or equal to zero")
     }
 
     @Test

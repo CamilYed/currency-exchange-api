@@ -1,44 +1,45 @@
 package camilyed.github.io.currencyexchangeapi.domain
 
+import camilyed.github.io.common.Money
 import java.math.BigDecimal
-import java.math.RoundingMode
 import java.util.*
 
 class Account(
     private val id: UUID,
     private val owner: String,
-    private var balancePln: BigDecimal,
-    private var balanceUsd: BigDecimal = BigDecimal.ZERO
+    private var balancePln: Money = Money(BigDecimal.ZERO, "PLN"),
+    private var balanceUsd: Money = Money(BigDecimal.ZERO, "USD")
 ) {
 
     init {
-        require(balancePln >= BigDecimal.ZERO) { "Initial balance cannot be negative" }
-        balancePln = balancePln.setScale(2)
-        balanceUsd = balanceUsd.setScale(2)
+        require(balancePln.currency == "PLN") { "PLN balance must be in PLN" }
+        require(balanceUsd.currency == "USD") { "USD balance must be in USD" }
     }
 
-    fun exchangePlnToUsd(amountPln: BigDecimal, exchangeRate: ExchangeRate) {
-        require(amountPln > BigDecimal.ZERO) { "Amount must be greater than 0" }
+    fun exchangePlnToUsd(amountPln: Money, exchangeRate: ExchangeRate) {
+        require(amountPln.currency == "PLN") { "Amount must be in PLN" }
+        require(!amountPln.isZero()) { "Amount must be greater than 0" }
         require(amountPln <= balancePln) { "Insufficient PLN balance" }
-        val amountUsd = exchangeRate.convertFromPln(amountPln)
-        balancePln = balancePln.subtract(amountPln)
-        balanceUsd = balanceUsd.add(amountUsd)
+        val amountUsd = Money(exchangeRate.convertFromPln(amountPln.amount), "USD")
+        balancePln -= amountPln
+        balanceUsd += amountUsd
     }
 
-    fun exchangeUsdToPln(amountUsd: BigDecimal, exchangeRate: ExchangeRate) {
-        require(amountUsd > BigDecimal.ZERO) { "Amount must be greater than 0" }
+    fun exchangeUsdToPln(amountUsd: Money, exchangeRate: ExchangeRate) {
+        require(amountUsd.currency == "USD") { "Amount must be in USD" }
+        require(!amountUsd.isZero()) { "Amount must be greater than 0" }
         require(amountUsd <= balanceUsd) { "Insufficient USD balance" }
-        val amountPln = exchangeRate.convertToPln(amountUsd)
-        balanceUsd = balanceUsd.subtract(amountUsd)
-        balancePln = balancePln.add(amountPln)
+        val amountPln = Money(exchangeRate.convertToPln(amountUsd.amount), "PLN")
+        balanceUsd -= amountUsd
+        balancePln += amountPln
     }
 
     fun toSnapshot(): AccountSnapshot {
         return AccountSnapshot(
             id = id,
             owner = owner,
-            balancePln = balancePln,
-            balanceUsd = balanceUsd
+            balancePln = balancePln.amount,
+            balanceUsd = balanceUsd.amount
         )
     }
 }

@@ -18,7 +18,7 @@ class CreateAccountCommandBuilder private constructor() {
     }
 
     companion object {
-        fun anAccount(): CreateAccountCommandBuilder {
+        fun aCreateAccountCommand(): CreateAccountCommandBuilder {
             return CreateAccountCommandBuilder()
         }
     }

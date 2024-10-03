@@ -219,7 +219,7 @@ class AccountServiceTest : SetNextAccountIdAbility, CreateAccountAbility {
     @Test
     fun `should exchange full PLN balance to USD`() {
         // given
-        val account = thereIsAnAccount(anAccount().withBalancePln("1000.00"))
+        val account = thereIsAnAccount(anAccount().withBalancePln("1000.00").withBalanceUsd("0.00"))
 
         // when
         val updatedAccount = exchange(
@@ -233,6 +233,25 @@ class AccountServiceTest : SetNextAccountIdAbility, CreateAccountAbility {
         expectThat(updatedAccount)
             .hasBalanceInPln("0.00")
             .hasBalanceInUsd("250.00")
+    }
+
+    @Test
+    fun `should exchange full USD balance to PLN`() {
+        // given
+        val account = thereIsAnAccount(anAccount().withBalanceUsd("100.00").withBalancePln("0.00"))
+
+        // when
+        val updatedAccount = exchange(
+            anExchangeToPln()
+                .withAccountId(account.id)
+                .withAmount("100.00")
+                .withExchangeRate("4.0")
+        )
+
+        // then
+        expectThat(updatedAccount)
+            .hasBalanceInPln("400.00")
+            .hasBalanceInUsd("0.00")
     }
 
     private fun create(command: CreateAccountCommandBuilder): AccountSnapshot {

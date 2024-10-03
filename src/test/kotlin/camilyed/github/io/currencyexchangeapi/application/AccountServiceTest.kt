@@ -159,7 +159,6 @@ class AccountServiceTest : SetNextAccountIdAbility, CreateAccountAbility {
                 anExchangeToUsd()
                     .withAccountId(account.id)
                     .withAmount("200.00")
-                    .withExchangeRate("4.0")
             )
         }.isFailure()
             .isA<IllegalArgumentException>()

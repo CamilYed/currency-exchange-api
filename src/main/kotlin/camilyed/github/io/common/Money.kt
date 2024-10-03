@@ -13,4 +13,10 @@ data class Money(val amount: BigDecimal, val currency: String) {
         require(currency == other.currency) { "Currencies must match to perform addition" }
         return Money(amount.add(other.amount), currency)
     }
+
+    operator fun minus(other: Money): Money {
+        require(currency == other.currency) { "Currencies must match to perform subtraction" }
+        require(amount >= other.amount) { "Insufficient funds" }
+        return Money(amount.subtract(other.amount), currency)
+    }
 }

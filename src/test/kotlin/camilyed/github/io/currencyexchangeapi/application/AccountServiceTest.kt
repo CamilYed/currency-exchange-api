@@ -35,6 +35,7 @@ class AccountServiceTest :
     SetNextAccountIdAbility,
     CreateAccountAbility,
     GetCurrentExchangeRateAbility {
+
     override val accountRepository = TestingAccountRepository()
     override val exchangeRateProvider = TestingCurrentExchangeRateProvider()
 

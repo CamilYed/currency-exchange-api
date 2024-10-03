@@ -15,3 +15,13 @@ import_order = camelcase, spaces, semicolons
 
 [*.kt]
 ij_kotlin_packages_to_use_import_on_demand = emptyList()
+
+# Disable specific rules for all Kotlin test classes
+[**/test/**/*.kt]
+disabled_rules=no-blank-line-before-class-body
+
+[**/integrationTest/**/*.kt]
+disabled_rules=no-blank-line-before-class-body
+
+[*.kt]
+disabled_rules=empty-class-body

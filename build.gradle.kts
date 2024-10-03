@@ -12,12 +12,29 @@ version = "1.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
+    maven {
+        url = uri("https://repo.spring.io/release")
+    }
+    maven {
+        url = uri("https://repo.spring.io/milestone")
+    }
+    maven {
+        url = uri("https://repo.spring.io/snapshot")
+    }
 }
 
 dependencies {
+    implementation("io.github.microutils:kotlin-logging-jvm:3.0.5")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.2")
+    implementation("org.jetbrains.exposed:exposed-core:0.43.0")
+    implementation("org.jetbrains.exposed:exposed-jdbc:0.43.0")
+    implementation("javax.servlet:javax.servlet-api:4.0.1")
+
     // Spring Boot dependencies
     implementation("org.springframework.boot:spring-boot-starter")
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-jdbc")
+    implementation("org.springframework.cloud:spring-cloud-starter-openfeign:3.1.2")
 
     // Spring Boot Test
     testImplementation("org.springframework.boot:spring-boot-starter-test")
@@ -29,7 +46,7 @@ dependencies {
 
     // Integration Test dependencies
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-
+    testImplementation("org.wiremock:wiremock:3.9.1")
     testImplementation("org.testcontainers:junit-jupiter:1.20.2")
     testImplementation("org.testcontainers:postgresql:1.20.2")
     testImplementation("org.flywaydb:flyway-core")
@@ -83,3 +100,11 @@ tasks.check {
 
 apply(plugin = "org.jlleitschuh.gradle.ktlint")
 apply(plugin = "io.gitlab.arturbosch.detekt")
+
+ktlint {
+    version.set("0.49.1")
+    filter {
+        exclude("**/test/**")
+        exclude("**/integrationTest/**")
+    }
+}

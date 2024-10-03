@@ -13,6 +13,7 @@ class AccountService(
     private val repository: AccountRepository,
     private val currentExchangeRateProvider: CurrentExchangeRateProvider,
 ) {
+
     fun create(command: CreateAccountCommand): AccountSnapshot {
         val id = repository.nextAccountId()
         val account =
@@ -22,7 +23,7 @@ class AccountService(
                 balancePln = Money.pln(command.initialBalance),
                 balanceUsd = Money.usd(BigDecimal.ZERO),
             )
-        repository.save(account)
+        inTransaction { repository.save(account) }
         return account.toSnapshot()
     }
 

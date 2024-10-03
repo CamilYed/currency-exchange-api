@@ -165,6 +165,23 @@ class AccountServiceTest : SetNextAccountIdAbility, CreateAccountAbility {
             .message.isEqualTo("Insufficient PLN balance")
     }
 
+    @Test
+    fun `should throw exception if USD balance is insufficient`() {
+        // given
+        val account = thereIsAnAccount(anAccount().withBalanceUsd("50.00"))
+
+        // then
+        expectCatching {
+            exchange(
+                anExchangeToPln()
+                    .withAccountId(account.id)
+                    .withAmount("100.00")
+            )
+        }.isFailure()
+            .isA<IllegalArgumentException>()
+            .message.isEqualTo("Insufficient USD balance")
+    }
+
     private fun create(command: CreateAccountCommandBuilder): AccountSnapshot {
         return accountService.create(command.build())
     }

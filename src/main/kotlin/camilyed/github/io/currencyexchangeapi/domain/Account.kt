@@ -19,6 +19,7 @@ class Account(
 
     fun exchangePlnToUsd(amountPln: BigDecimal, exchangeRate: BigDecimal) {
         require(amountPln > BigDecimal.ZERO) { "Amount must be greater than 0" }
+        require(amountPln <= balancePln) { "Insufficient PLN balance" }
         val amountUsd = amountPln.divide(exchangeRate, 2, RoundingMode.HALF_EVEN)
         balancePln = balancePln.subtract(amountPln)
         balanceUsd = balanceUsd.add(amountUsd)

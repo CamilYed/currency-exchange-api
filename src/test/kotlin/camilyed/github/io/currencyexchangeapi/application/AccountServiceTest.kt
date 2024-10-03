@@ -216,6 +216,25 @@ class AccountServiceTest : SetNextAccountIdAbility, CreateAccountAbility {
             .message.isEqualTo("Insufficient USD balance")
     }
 
+    @Test
+    fun `should exchange full PLN balance to USD`() {
+        // given
+        val account = thereIsAnAccount(anAccount().withBalancePln("1000.00"))
+
+        // when
+        val updatedAccount = exchange(
+            anExchangeToUsd()
+                .withAccountId(account.id)
+                .withAmount("1000.00")
+                .withExchangeRate("4.0")
+        )
+
+        // then
+        expectThat(updatedAccount)
+            .hasBalanceInPln("0.00")
+            .hasBalanceInUsd("250.00")
+    }
+
     private fun create(command: CreateAccountCommandBuilder): AccountSnapshot {
         return accountService.create(command.build())
     }

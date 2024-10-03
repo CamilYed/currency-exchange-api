@@ -36,4 +36,15 @@ class MoneyTest {
             .isA<IllegalArgumentException>()
             .message.isEqualTo("Currency cannot be empty")
     }
+
+    @Test
+    fun `should add two money objects with same currency`() {
+        val money1 = Money(BigDecimal("100.00"), "USD")
+        val money2 = Money(BigDecimal("50.00"), "USD")
+
+        val result = money1 + money2
+
+        expectThat(result.amount).isEqualTo(BigDecimal("150.00"))
+        expectThat(result.currency).isEqualTo("USD")
+    }
 }

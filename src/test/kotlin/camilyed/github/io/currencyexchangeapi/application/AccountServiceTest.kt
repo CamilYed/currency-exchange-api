@@ -1,6 +1,9 @@
 package camilyed.github.io.currencyexchangeapi.application
 
 import camilyed.github.io.currencyexchangeapi.domain.AccountSnapshot
+import camilyed.github.io.currencyexchangeapi.domain.InsufficientFundsException
+import camilyed.github.io.currencyexchangeapi.domain.InvalidAmountException
+import camilyed.github.io.currencyexchangeapi.domain.InvalidExchangeRateException
 import camilyed.github.io.currencyexchangeapi.testing.ability.CreateAccountAbility
 import camilyed.github.io.currencyexchangeapi.testing.ability.SetNextAccountIdAbility
 import camilyed.github.io.currencyexchangeapi.testing.assertions.hasBalanceInPln
@@ -22,7 +25,6 @@ import strikt.assertions.isA
 import strikt.assertions.isEqualTo
 import strikt.assertions.isFailure
 import strikt.assertions.message
-import java.math.BigDecimal
 
 class AccountServiceTest : SetNextAccountIdAbility, CreateAccountAbility {
 
@@ -105,7 +107,7 @@ class AccountServiceTest : SetNextAccountIdAbility, CreateAccountAbility {
                     .withAmount("0.00")
             )
         }.isFailure()
-            .isA<IllegalArgumentException>()
+            .isA<InvalidAmountException>()
             .message.isEqualTo("Amount must be greater than 0")
     }
 
@@ -162,7 +164,7 @@ class AccountServiceTest : SetNextAccountIdAbility, CreateAccountAbility {
                     .withAmount("0.00")
             )
         }.isFailure()
-            .isA<IllegalArgumentException>()
+            .isA<InvalidAmountException>()
             .message.isEqualTo("Amount must be greater than 0")
     }
 
@@ -196,7 +198,7 @@ class AccountServiceTest : SetNextAccountIdAbility, CreateAccountAbility {
                     .withAmount("200.00")
             )
         }.isFailure()
-            .isA<IllegalArgumentException>()
+            .isA<InsufficientFundsException>()
             .message.isEqualTo("Insufficient PLN balance")
     }
 
@@ -213,7 +215,7 @@ class AccountServiceTest : SetNextAccountIdAbility, CreateAccountAbility {
                     .withAmount("100.00")
             )
         }.isFailure()
-            .isA<IllegalArgumentException>()
+            .isA<InsufficientFundsException>()
             .message.isEqualTo("Insufficient USD balance")
     }
 
@@ -268,7 +270,7 @@ class AccountServiceTest : SetNextAccountIdAbility, CreateAccountAbility {
                     .withExchangeRate("0.00")
             )
         }.isFailure()
-            .isA<IllegalArgumentException>()
+            .isA<InvalidExchangeRateException>()
             .message.isEqualTo("Exchange rate must be greater than 0")
     }
 

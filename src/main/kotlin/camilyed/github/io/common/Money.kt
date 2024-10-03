@@ -7,7 +7,9 @@ data class Money(val amount: BigDecimal, val currency: String) {
 
     init {
         require(amount >= BigDecimal.ZERO) { "Money amount must be greater than or equal to zero" }
-        require(currency.isNotEmpty()) { "Currency cannot be empty" }
+        require(currency == "PLN" || currency == "USD") {
+            throw UnsupportedCurrencyException("Unsupported currency: $currency")
+        }
         amount.setScale(2, RoundingMode.HALF_EVEN)
     }
 
@@ -36,3 +38,4 @@ data class Money(val amount: BigDecimal, val currency: String) {
         fun usd(amount: BigDecimal) = Money(amount.setScale(2, RoundingMode.HALF_EVEN), "USD")
     }
 }
+class UnsupportedCurrencyException(message: String) : RuntimeException(message)

@@ -6,7 +6,9 @@ import java.math.RoundingMode
 data class ExchangeRate(val rate: BigDecimal) {
 
     init {
-        require(rate > BigDecimal.ZERO) { "Exchange rate must be greater than 0" }
+        if (rate <= BigDecimal.ZERO) {
+            throw InvalidExchangeRateException("Exchange rate must be greater than 0")
+        }
     }
 
     fun convertFromPln(amountPln: BigDecimal): BigDecimal {

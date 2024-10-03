@@ -33,8 +33,8 @@ class MoneyTest {
         expectCatching {
             Money(BigDecimal("100.00"), "")
         }.isFailure()
-            .isA<IllegalArgumentException>()
-            .message.isEqualTo("Currency cannot be empty")
+            .isA<UnsupportedCurrencyException>()
+            .message.isEqualTo("Unsupported currency: ")
     }
 
     @Test

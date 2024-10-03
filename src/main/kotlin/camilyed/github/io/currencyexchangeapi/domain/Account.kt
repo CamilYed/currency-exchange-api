@@ -17,18 +17,18 @@ class Account(
     }
 
     fun exchangePlnToUsd(amountPln: Money, exchangeRate: ExchangeRate) {
-        require(amountPln.currency == "PLN") { "Amount must be in PLN" }
-        require(!amountPln.isZero()) { "Amount must be greater than 0" }
-        require(amountPln <= balancePln) { "Insufficient PLN balance" }
+        require(!amountPln.isZero()) { throw InvalidAmountException("Amount must be greater than 0") }
+        require(amountPln <= balancePln) { throw InsufficientFundsException("Insufficient PLN balance") }
+
         val amountUsd = Money(exchangeRate.convertFromPln(amountPln.amount), "USD")
         balancePln -= amountPln
         balanceUsd += amountUsd
     }
 
     fun exchangeUsdToPln(amountUsd: Money, exchangeRate: ExchangeRate) {
-        require(amountUsd.currency == "USD") { "Amount must be in USD" }
-        require(!amountUsd.isZero()) { "Amount must be greater than 0" }
-        require(amountUsd <= balanceUsd) { "Insufficient USD balance" }
+        require(!amountUsd.isZero()) { throw InvalidAmountException("Amount must be greater than 0") }
+        require(amountUsd <= balanceUsd) { throw InsufficientFundsException("Insufficient USD balance") }
+
         val amountPln = Money(exchangeRate.convertToPln(amountUsd.amount), "PLN")
         balanceUsd -= amountUsd
         balancePln += amountPln

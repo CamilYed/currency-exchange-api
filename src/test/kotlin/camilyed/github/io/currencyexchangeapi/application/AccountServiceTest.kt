@@ -22,6 +22,7 @@ import strikt.assertions.isA
 import strikt.assertions.isEqualTo
 import strikt.assertions.isFailure
 import strikt.assertions.message
+import java.math.BigDecimal
 
 class AccountServiceTest : SetNextAccountIdAbility, CreateAccountAbility {
 
@@ -269,6 +270,82 @@ class AccountServiceTest : SetNextAccountIdAbility, CreateAccountAbility {
         }.isFailure()
             .isA<IllegalArgumentException>()
             .message.isEqualTo("Exchange rate must be greater than 0")
+    }
+
+    @Test
+    fun `should round exchange PLN to USD to 2 decimal places`() {
+        // given
+        val account = thereIsAnAccount(anAccount().withBalancePln("1000.00"))
+
+        // when
+        val updatedAccount = exchange(
+            anExchangeToUsd()
+                .withAccountId(account.id)
+                .withAmount("123.456")
+                .withExchangeRate("4.0")
+        )
+
+        // then
+        expectThat(updatedAccount)
+            .hasBalanceInPln("876.54")
+            .hasBalanceInUsd("30.86") // 123.456 / 4 = 30.864 -> rounded to 30.86
+    }
+
+    @Test
+    fun `should round exchange USD to PLN to 2 decimal places`() {
+        // given
+        val account = thereIsAnAccount(anAccount().withBalanceUsd("100.00").withBalancePln("0.00"))
+
+        // when
+        val updatedAccount = exchange(
+            anExchangeToPln()
+                .withAccountId(account.id)
+                .withAmount("33.335")
+                .withExchangeRate("4.0")
+        )
+
+        // then
+        expectThat(updatedAccount)
+            .hasBalanceInPln("133.36")
+            .hasBalanceInUsd("66.66") // 100 - 33.335 -> rounded to 66.66
+    }
+
+    @Test
+    fun `should exchange full PLN to USD with rounding`() {
+        // given
+        val account = thereIsAnAccount(anAccount().withBalancePln("1000.00"))
+
+        // when
+        val updatedAccount = exchange(
+            anExchangeToUsd()
+                .withAccountId(account.id)
+                .withAmount("1000.00")
+                .withExchangeRate("3.33")
+        )
+
+        // then
+        expectThat(updatedAccount)
+            .hasBalanceInPln("0.00")
+            .hasBalanceInUsd("300.30") // 1000 / 3.33 = 300.3003 -> rounded to 300.30
+    }
+
+    @Test
+    fun `should exchange full USD to PLN with rounding`() {
+        // given
+        val account = thereIsAnAccount(anAccount().withBalanceUsd("100.00").withBalancePln("0.00"))
+
+        // when
+        val updatedAccount = exchange(
+            anExchangeToPln()
+                .withAccountId(account.id)
+                .withAmount("100.00")
+                .withExchangeRate("4.5")
+        )
+
+        // then
+        expectThat(updatedAccount)
+            .hasBalanceInPln("450.00") // 100 * 4.5 = 450
+            .hasBalanceInUsd("0.00")
     }
 
     private fun create(command: CreateAccountCommandBuilder): AccountSnapshot {

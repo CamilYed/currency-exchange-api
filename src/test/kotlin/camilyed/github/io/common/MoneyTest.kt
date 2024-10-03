@@ -70,4 +70,34 @@ class MoneyTest {
             .isA<IllegalArgumentException>()
             .message.isEqualTo("Insufficient funds")
     }
+
+    @Test
+    fun `should round result to 2 decimal places when subtracting`() {
+        val money1 = Money(BigDecimal("100.555"), "USD")
+        val money2 = Money(BigDecimal("50.123"), "USD")
+
+        val result = money1 - money2
+
+        expectThat(result.amount).isEqualTo(BigDecimal("50.43"))
+    }
+
+    @Test
+    fun `should round using HALF_EVEN rounding mode when adding`() {
+        val money1 = Money(BigDecimal("100.505"), "USD")
+        val money2 = Money(BigDecimal("50.505"), "USD")
+
+        val result = money1 + money2
+
+        expectThat(result.amount).isEqualTo(BigDecimal("151.01"))
+    }
+
+    @Test
+    fun `should round using HALF_EVEN rounding mode when subtracting`() {
+        val money1 = Money(BigDecimal("100.505"), "USD")
+        val money2 = Money(BigDecimal("50.505"), "USD")
+
+        val result = money1 - money2
+
+        expectThat(result.amount).isEqualTo(BigDecimal("50.00"))
+    }
 }

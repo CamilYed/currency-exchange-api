@@ -4,7 +4,6 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 
 data class Money(val amount: BigDecimal, val currency: String) {
-
     init {
         require(amount >= BigDecimal.ZERO) { "Money amount must be greater than or equal to zero" }
         require(currency == "PLN" || currency == "USD") {
@@ -35,7 +34,9 @@ data class Money(val amount: BigDecimal, val currency: String) {
 
     companion object {
         fun pln(amount: BigDecimal) = Money(amount.setScale(2, RoundingMode.HALF_EVEN), "PLN")
+
         fun usd(amount: BigDecimal) = Money(amount.setScale(2, RoundingMode.HALF_EVEN), "USD")
     }
 }
+
 class UnsupportedCurrencyException(message: String) : RuntimeException(message)

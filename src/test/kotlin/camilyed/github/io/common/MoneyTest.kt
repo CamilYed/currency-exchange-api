@@ -10,7 +10,6 @@ import strikt.assertions.message
 import java.math.BigDecimal
 
 class MoneyTest {
-
     @Test
     fun `should create money with valid amount and currency`() {
         val money = Money(BigDecimal("100.00"), "USD")

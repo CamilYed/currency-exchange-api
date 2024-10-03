@@ -1,6 +1,7 @@
 plugins {
     kotlin("jvm") version "2.0.20"
     id("io.gitlab.arturbosch.detekt") version("1.23.7")
+    id("org.jlleitschuh.gradle.ktlint") version("12.1.1")
 }
 
 group = "camilyed.github.io"
@@ -22,3 +23,5 @@ tasks.test {
 kotlin {
     jvmToolchain(21)
 }
+
+apply(plugin = "org.jlleitschuh.gradle.ktlint")

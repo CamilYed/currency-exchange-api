@@ -109,6 +109,23 @@ class AccountServiceTest : SetNextAccountIdAbility, CreateAccountAbility {
     }
 
     @Test
+    fun `should not allow a negative PLN amount to be provided for exchange`() {
+        // given
+        val account = thereIsAnAccount(anAccount())
+
+        // then
+        expectCatching {
+            exchange(
+                anExchangeToUsd()
+                    .withAccountId(account.id)
+                    .withAmount("-100.00")
+            )
+        }.isFailure()
+            .isA<IllegalArgumentException>()
+            .message.isEqualTo("Amount must be greater than 0")
+    }
+
+    @Test
     fun `should exchange USD to PLN`() {
         // given
         var account = thereIsAnAccount(
@@ -142,6 +159,23 @@ class AccountServiceTest : SetNextAccountIdAbility, CreateAccountAbility {
                 anExchangeToPln()
                     .withAccountId(account.id)
                     .withAmount("0.00")
+            )
+        }.isFailure()
+            .isA<IllegalArgumentException>()
+            .message.isEqualTo("Amount must be greater than 0")
+    }
+
+    @Test
+    fun `should not allow a negative USD amount to be provided for exchange`() {
+        // given
+        val account = thereIsAnAccount(anAccount())
+
+        // then
+        expectCatching {
+            exchange(
+                anExchangeToPln()
+                    .withAccountId(account.id)
+                    .withAmount("-100.00")
             )
         }.isFailure()
             .isA<IllegalArgumentException>()

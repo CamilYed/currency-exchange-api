@@ -23,6 +23,19 @@ repositories {
     }
 }
 
+val integrationTest: SourceSet =
+    sourceSets.create("integrationTest") {
+        java {
+            compileClasspath += sourceSets.main.get().output + sourceSets.test.get().output
+            runtimeClasspath += sourceSets.main.get().output + sourceSets.test.get().output
+            srcDir("src/integration-test/java")
+        }
+        resources.srcDir("src/integration-test/resources")
+    }
+
+configurations[integrationTest.implementationConfigurationName].extendsFrom(configurations.testImplementation.get())
+configurations[integrationTest.runtimeOnlyConfigurationName].extendsFrom(configurations.testRuntimeOnly.get())
+
 dependencies {
     implementation("io.github.microutils:kotlin-logging-jvm:3.0.5")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.2")
@@ -33,6 +46,7 @@ dependencies {
     // Spring Boot dependencies
     implementation("org.springframework.boot:spring-boot-starter")
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-jdbc")
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign:3.1.2")
 
@@ -43,6 +57,8 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.7.0")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.7.0")
     testImplementation("io.strikt:strikt-core:0.34.0")
+    testImplementation("io.strikt:strikt-jackson:0.34.0")
+    testImplementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.2")
 
     // Integration Test dependencies
     testImplementation("org.springframework.boot:spring-boot-starter-test")
@@ -68,19 +84,6 @@ tasks.withType<Test> {
         events("passed", "skipped", "failed")
     }
 }
-
-val integrationTest: SourceSet =
-    sourceSets.create("integrationTest") {
-        java {
-            compileClasspath += sourceSets.main.get().output + sourceSets.test.get().output
-            runtimeClasspath += sourceSets.main.get().output + sourceSets.test.get().output
-            srcDir("src/integration-test/java")
-        }
-        resources.srcDir("src/integration-test/resources")
-    }
-
-configurations[integrationTest.implementationConfigurationName].extendsFrom(configurations.testImplementation.get())
-configurations[integrationTest.runtimeOnlyConfigurationName].extendsFrom(configurations.testRuntimeOnly.get())
 
 val integrationTestTask =
     tasks.register<Test>("integrationTest") {

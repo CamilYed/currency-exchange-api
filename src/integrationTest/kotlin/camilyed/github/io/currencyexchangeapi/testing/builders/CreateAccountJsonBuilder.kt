@@ -1,20 +1,20 @@
 package camilyed.github.io.currencyexchangeapi.testing.builders
 
 class CreateAccountJsonBuilder {
-    private var owner: String = "John Doe"
-    private var initialBalance: String = "1000.00"
+    private var owner: String? = "John Doe"
+    private var initialBalance: String? = "1000.00"
 
-    fun withOwner(owner: String) =
+    fun withOwner(owner: String?) =
         apply {
             this.owner = owner
         }
 
-    fun withInitialBalance(initialBalance: String) =
+    fun withInitialBalance(initialBalance: String?) =
         apply {
             this.initialBalance = initialBalance
         }
 
-    fun build(): Map<String, Any> {
+    fun build(): Map<String, Any?> {
         return mapOf(
             "owner" to owner,
             "initialBalance" to initialBalance,

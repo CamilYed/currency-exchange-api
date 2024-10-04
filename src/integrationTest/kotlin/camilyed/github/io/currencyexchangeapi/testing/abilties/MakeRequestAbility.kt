@@ -18,7 +18,7 @@ interface MakeRequestAbility {
 
     fun <T> post(
         url: String,
-        body: Map<String, Any>,
+        body: Map<String, Any?>,
         responseType: Class<T>,
     ): ResponseEntity<T> {
         val jsonString = toJson(body)

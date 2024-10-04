@@ -1,0 +1,65 @@
+package camilyed.github.io.currencyexchangeapi.testing.assertion
+
+import com.fasterxml.jackson.core.type.TypeReference
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
+import strikt.api.Assertion
+import java.util.UUID
+
+fun <T> Assertion.Builder<ResponseEntity<T>>.isOkResponse(): Assertion.Builder<ResponseEntity<T>> =
+    assert("should have a successful response status") {
+        if (it.statusCode == HttpStatus.OK || it.statusCode == HttpStatus.CREATED) {
+            pass()
+        } else {
+            fail("Expected OK or CREATED, but got ${it.statusCode}")
+        }
+    }
+
+fun Assertion.Builder<ResponseEntity<String>>.hasUUID(): Assertion.Builder<ResponseEntity<String>> =
+    assert("should contain a valid UUID in 'id' field") {
+        val body = parseBodyToMap(it)
+        val actualId =
+            body["id"] as? String ?: fail("Response does not contain 'id' or 'id' is not a String")
+        try {
+            UUID.fromString(actualId as String)
+            pass()
+        } catch (e: IllegalArgumentException) {
+            fail("The 'id' is not a valid UUID: $actualId")
+        }
+    }
+
+fun <T> Assertion.Builder<ResponseEntity<T>>.isBadRequest(): Assertion.Builder<ResponseEntity<T>> =
+    assert("should have a BAD REQUEST response status") {
+        if (it.statusCode == HttpStatus.BAD_REQUEST) {
+            pass()
+        } else {
+            fail("Expected BAD REQUEST, but got ${it.statusCode}")
+        }
+    }
+
+fun Assertion.Builder<ResponseEntity<String>>.hasProblemDetail(
+    expectedField: String,
+    expectedDetail: String,
+): Assertion.Builder<ResponseEntity<String>> =
+    assert("should contain problem detail, field '$expectedField' with value '$expectedDetail'") {
+        val body = parseBodyToMap(it)
+        val actualDetail =
+            body["detail"] as? String ?: fail("No 'detail' field in response body") as String
+        if (actualDetail.contains("$expectedField: $expectedDetail")) {
+            pass()
+        } else {
+            fail(
+                "Expected error detail for field " +
+                    "'$expectedField' with message " +
+                    "'$expectedDetail', " +
+                    "but got '$actualDetail'",
+            )
+        }
+    }
+
+val objectMapper = jacksonObjectMapper()
+
+private fun parseBodyToMap(response: ResponseEntity<String>): Map<String, Any> {
+    return objectMapper.readValue(response.body!!, object : TypeReference<Map<String, Any>>() {})
+}

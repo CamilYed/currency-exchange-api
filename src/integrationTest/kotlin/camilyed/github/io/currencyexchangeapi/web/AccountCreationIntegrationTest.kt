@@ -10,6 +10,8 @@ import camilyed.github.io.currencyexchangeapi.testing.assertion.isOkResponse
 import camilyed.github.io.currencyexchangeapi.testing.builders.CreateAccountJsonBuilder.Companion.aCreateAccount
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
+import strikt.assertions.isEqualTo
+import java.util.UUID
 
 class AccountCreationIntegrationTest :
     BaseIntegrationTest(),
@@ -73,6 +75,24 @@ class AccountCreationIntegrationTest :
         expectThat(response)
             .isBadRequest()
             .hasProblemDetail("initialBalance", "Initial balance must be a valid decimal number")
-        // TODO bardziej szczegolowo
+        // TODO more detailed response
+    }
+
+
+    @Test
+    fun `should create account only once for the same request id`() {
+        // given
+        val requestId = "05df4b53-1d60-420b-9b46-63c867c0dd02"
+
+        // when
+        val firstResponse = createAccount(aCreateAccount().withXRequestId(requestId))
+        val secondResponse = createAccount(aCreateAccount().withXRequestId(requestId))
+
+        // then
+        expectThat(firstResponse).isOkResponse().hasUUID()
+        expectThat(secondResponse).isOkResponse().hasUUID()
+
+        // and
+        expectThat(firstResponse.body).isEqualTo(secondResponse.body)
     }
 }

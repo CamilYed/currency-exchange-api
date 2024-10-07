@@ -19,6 +19,7 @@ import camilyed.github.io.currencyexchangeapi.testing.builders.ExchangePlnToUsdC
 import camilyed.github.io.currencyexchangeapi.testing.builders.ExchangePlnToUsdCommandBuilder.Companion.anExchangeToUsd
 import camilyed.github.io.currencyexchangeapi.testing.builders.ExchangeUsdToPlnCommandBuilder
 import camilyed.github.io.currencyexchangeapi.testing.builders.ExchangeUsdToPlnCommandBuilder.Companion.anExchangeToPln
+import camilyed.github.io.currencyexchangeapi.testing.fakes.TestingAccountOperationRepository
 import camilyed.github.io.currencyexchangeapi.testing.fakes.TestingAccountRepository
 import camilyed.github.io.currencyexchangeapi.testing.fakes.TestingCurrentExchangeRateProvider
 import org.junit.jupiter.api.BeforeEach
@@ -39,7 +40,11 @@ class AccountServiceTest :
     override val accountRepository = TestingAccountRepository()
     override val exchangeRateProvider = TestingCurrentExchangeRateProvider()
 
-    private val accountService = AccountService(accountRepository, exchangeRateProvider)
+    private val accountService = AccountService(
+        accountRepository,
+        exchangeRateProvider,
+        TestingAccountOperationRepository(),
+    )
 
     @BeforeEach
     fun setup() {

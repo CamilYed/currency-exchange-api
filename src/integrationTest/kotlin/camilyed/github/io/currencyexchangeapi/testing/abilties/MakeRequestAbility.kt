@@ -19,10 +19,10 @@ interface MakeRequestAbility {
     fun <T> post(
         url: String,
         body: Map<String, Any?>,
+        headers: HttpHeaders,
         responseType: Class<T>,
     ): ResponseEntity<T> {
         val jsonString = toJson(body)
-        val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
         val requestEntity = HttpEntity(jsonString, headers)
         return restTemplate.postForEntity(url, requestEntity, responseType)

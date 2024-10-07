@@ -2,6 +2,7 @@ package camilyed.github.io.currencyexchangeapi.testing.builders
 
 import camilyed.github.io.currencyexchangeapi.application.CreateAccountCommand
 import java.math.BigDecimal
+import java.util.UUID
 
 class CreateAccountCommandBuilder private constructor() {
     private var owner: String = "Grzegorz Brzęczyszczykiewicz"
@@ -18,6 +19,7 @@ class CreateAccountCommandBuilder private constructor() {
         return CreateAccountCommand(
             owner = owner,
             initialBalance = initialBalance,
+            UUID.randomUUID(),
         )
     }
 

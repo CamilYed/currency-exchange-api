@@ -39,8 +39,10 @@ configurations[integrationTest.runtimeOnlyConfigurationName].extendsFrom(configu
 dependencies {
     implementation("io.github.microutils:kotlin-logging-jvm:3.0.5")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.2")
-    implementation("org.jetbrains.exposed:exposed-core:0.43.0")
-    implementation("org.jetbrains.exposed:exposed-jdbc:0.43.0")
+    implementation("org.jetbrains.exposed:exposed-core:0.55.0")
+    implementation("org.jetbrains.exposed:exposed-java-time:0.55.0")
+//    implementation("org.jetbrains.exposed:exposed-kotlin-datetime:0.55.0")
+    implementation("org.jetbrains.exposed:exposed-jdbc:0.55.0")
     implementation("javax.servlet:javax.servlet-api:4.0.1")
 
     // Spring Boot dependencies

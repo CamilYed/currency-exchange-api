@@ -3,7 +3,7 @@ package camilyed.github.io.currencyexchangeapi.testing.builders
 class CreateAccountJsonBuilder {
     private var owner: String? = "John Doe"
     private var initialBalance: String? = "1000.00"
-    private var xRequestId: String = "05df4b53-1d60-420b-9b46-63c867c0dd02"
+    var xRequestId: String = "05df4b53-1d60-420b-9b46-63c867c0dd02"
 
     fun withOwner(owner: String?) =
         apply {

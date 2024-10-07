@@ -11,7 +11,6 @@ import camilyed.github.io.currencyexchangeapi.testing.builders.CreateAccountJson
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
-import java.util.UUID
 
 class AccountCreationIntegrationTest :
     BaseIntegrationTest(),
@@ -34,7 +33,7 @@ class AccountCreationIntegrationTest :
     }
 
     @Test
-    fun `should return BAD REQUEST when owner is missing`() {
+    fun `should get errror when owner is missing`() {
         // when
         val response = createAccount(aCreateAccount().withOwner(""))
 
@@ -45,7 +44,7 @@ class AccountCreationIntegrationTest :
     }
 
     @Test
-    fun `should return BAD REQUEST when owner is null`() {
+    fun `should get error when owner is null`() {
         // when
         val response = createAccount(aCreateAccount().withOwner(null))
 
@@ -56,7 +55,7 @@ class AccountCreationIntegrationTest :
     }
 
     @Test
-    fun `should return BAD REQUEST when initial balance is null`() {
+    fun `should get error when initial balance is null`() {
         // when
         val response = createAccount(aCreateAccount().withInitialBalance(null))
 
@@ -67,7 +66,7 @@ class AccountCreationIntegrationTest :
     }
 
     @Test
-    fun `should return BAD REQUEST when initial balance is not a decimal number`() {
+    fun `should get error when initial balance is not a decimal number`() {
         // when
         val response = createAccount(aCreateAccount().withInitialBalance("1.999"))
 
@@ -77,7 +76,6 @@ class AccountCreationIntegrationTest :
             .hasProblemDetail("initialBalance", "Initial balance must be a valid decimal number")
         // TODO more detailed response
     }
-
 
     @Test
     fun `should create account only once for the same request id`() {

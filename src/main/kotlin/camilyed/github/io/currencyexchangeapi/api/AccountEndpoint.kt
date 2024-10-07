@@ -10,9 +10,11 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.math.BigDecimal
+import java.util.UUID
 
 @RestController
 @RequestMapping("/api/accounts")
@@ -21,8 +23,9 @@ class AccountEndpoint(private val accountService: AccountService) {
     @PostMapping
     fun createAccount(
         @Valid @RequestBody request: CreateAccountJson,
+        @RequestHeader("X-Request-Id") requestId: UUID,
     ): ResponseEntity<AccountCreatedJson> {
-        val account = accountService.create(request.toCommand())
+        val account = accountService.create(request.toCommand(requestId))
         return ResponseEntity.status(HttpStatus.CREATED).body(account.toAccountCreatedJson())
     }
 
@@ -42,10 +45,11 @@ class AccountEndpoint(private val accountService: AccountService) {
         val id: String,
     )
 
-    private fun CreateAccountJson.toCommand() =
+    private fun CreateAccountJson.toCommand(commandId: UUID) =
         CreateAccountCommand(
             owner = this.owner!!,
             initialBalance = BigDecimal(this.initialBalance),
+            commandId,
         )
 
     private fun AccountSnapshot.toAccountCreatedJson() = AccountCreatedJson(this.id.toString())

@@ -1,7 +1,7 @@
 package camilyed.github.io.currencyexchangeapi.adapters.postgres
 
-import camilyed.github.io.common.Money
 import camilyed.github.io.currencyexchangeapi.domain.Account
+import camilyed.github.io.currencyexchangeapi.domain.AccountSnapshot
 import org.jetbrains.exposed.dao.id.UUIDTable
 import org.jetbrains.exposed.sql.ResultRow
 
@@ -12,11 +12,13 @@ object AccountsTable : UUIDTable("accounts") {
 }
 
 fun ResultRow.toAccount(): Account {
-    return Account(
-        id = this[AccountsTable.id].value,
-        owner = this[AccountsTable.owner],
-        balancePln = Money.pln(this[AccountsTable.balancePln]),
-        balanceUsd = Money.usd(this[AccountsTable.balanceUsd]),
+    return Account.fromSnapshot(
+        AccountSnapshot(
+            id = this[AccountsTable.id].value,
+            owner = this[AccountsTable.owner],
+            balancePln = this[AccountsTable.balancePln],
+            balanceUsd = this[AccountsTable.balanceUsd],
+        ),
     )
 }
 

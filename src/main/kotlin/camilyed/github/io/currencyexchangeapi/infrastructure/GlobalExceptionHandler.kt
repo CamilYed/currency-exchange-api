@@ -1,5 +1,6 @@
 package camilyed.github.io.currencyexchangeapi.infrastructure
 
+import jakarta.servlet.http.HttpServletRequest
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.FieldError
@@ -25,6 +26,20 @@ class GlobalExceptionHandler {
         )
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(problemDetails)
+    }
+
+    @ExceptionHandler(InvalidHeaderException::class)
+    fun handleInvalidHeaderException(
+        ex: InvalidHeaderException,
+        request: HttpServletRequest,
+    ): ResponseEntity<ProblemDetails> {
+        val problemDetails = ProblemDetails(
+            title = "Invalid Header",
+            status = HttpStatus.BAD_REQUEST.value(),
+            detail = "X-Request-Id: " + ex.message,
+            instance = request.requestURI,
+        )
+        return ResponseEntity(problemDetails, HttpStatus.BAD_REQUEST)
     }
 }
 

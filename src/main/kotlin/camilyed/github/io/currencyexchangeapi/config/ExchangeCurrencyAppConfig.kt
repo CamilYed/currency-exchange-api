@@ -1,6 +1,7 @@
 package camilyed.github.io.currencyexchangeapi.config
 
 import camilyed.github.io.currencyexchangeapi.application.AccountService
+import camilyed.github.io.currencyexchangeapi.domain.AccountOperationRepository
 import camilyed.github.io.currencyexchangeapi.domain.AccountRepository
 import camilyed.github.io.currencyexchangeapi.domain.CurrentExchangeRateProvider
 import org.springframework.context.annotation.Bean
@@ -13,8 +14,10 @@ class ExchangeCurrencyAppConfig {
     fun accountService(
         accountRepository: AccountRepository,
         currentExchangeRateProvider: CurrentExchangeRateProvider,
+        accountOperationRepository: AccountOperationRepository,
     ) = AccountService(
         accountRepository,
         currentExchangeRateProvider,
+        accountOperationRepository,
     )
 }

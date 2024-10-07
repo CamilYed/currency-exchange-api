@@ -3,6 +3,7 @@ package camilyed.github.io.currencyexchangeapi.api
 import camilyed.github.io.currencyexchangeapi.application.AccountService
 import camilyed.github.io.currencyexchangeapi.application.CreateAccountCommand
 import camilyed.github.io.currencyexchangeapi.domain.AccountSnapshot
+import camilyed.github.io.currencyexchangeapi.infrastructure.InvalidHeaderException
 import jakarta.validation.Valid
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Pattern
@@ -23,9 +24,12 @@ class AccountEndpoint(private val accountService: AccountService) {
     @PostMapping
     fun createAccount(
         @Valid @RequestBody request: CreateAccountJson,
-        @RequestHeader("X-Request-Id") requestId: UUID,
+        @RequestHeader("X-Request-Id") requestId: String?,
     ): ResponseEntity<AccountCreatedJson> {
-        val account = accountService.create(request.toCommand(requestId))
+        if (requestId == null) {
+            throw InvalidHeaderException("X-Request-Id is required and must be a valid UUID")
+        }
+        val account = accountService.create(request.toCommand(requestId.toUUID()))
         return ResponseEntity.status(HttpStatus.CREATED).body(account.toAccountCreatedJson())
     }
 
@@ -51,6 +55,14 @@ class AccountEndpoint(private val accountService: AccountService) {
             initialBalance = BigDecimal(this.initialBalance),
             commandId,
         )
+
+    private fun String.toUUID(): UUID {
+        try {
+            return UUID.fromString(this)
+        } catch (_: IllegalArgumentException) {
+            throw InvalidHeaderException("X-Request-Id is required and must be a valid UUID")
+        }
+    }
 
     private fun AccountSnapshot.toAccountCreatedJson() = AccountCreatedJson(this.id.toString())
 }

@@ -93,4 +93,26 @@ class AccountCreationIntegrationTest :
         // and
         expectThat(firstResponse.body).isEqualTo(secondResponse.body)
     }
+
+    @Test
+    fun `should get error if X-Request-Id is missing`() {
+        // when
+        val response = createAccount(aCreateAccount().withoutXRequestId())
+
+        // then
+        expectThat(response)
+            .isBadRequest()
+            .hasProblemDetail("X-Request-Id", "X-Request-Id is required and must be a valid UUID")
+    }
+
+    @Test
+    fun `should get error if X-Request-Id is not UUID`() {
+        // when
+        val response = createAccount(aCreateAccount().withXRequestId("not uuid"))
+
+        // then
+        expectThat(response)
+            .isBadRequest()
+            .hasProblemDetail("X-Request-Id", "X-Request-Id is required and must be a valid UUID")
+    }
 }

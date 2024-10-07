@@ -16,6 +16,7 @@ class ExchangePlnToUsdCommandBuilder private constructor() {
         return ExchangePlnToUsdCommand(
             accountId = accountId,
             amount = amount,
+            commandId = UUID.randomUUID(),
         )
     }
 

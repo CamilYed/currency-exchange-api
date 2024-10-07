@@ -1,14 +1,12 @@
 package camilyed.github.io.currencyexchangeapi.testing.abilties
 
-import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 
 interface GetCurrentExchangeRateAbility {
-    val wireMockServer: WireMockServer
 
     fun currentExchangeRateIs(rate: String) {
-        wireMockServer.stubFor(
-            WireMock.get("/api/exchangerates/rates/A/USD")
+        WireMock.stubFor(
+            WireMock.get(WireMock.urlEqualTo("/api/exchangerates/rates/A/USD"))
                 .willReturn(
                     WireMock.aResponse()
                         .withHeader("Content-Type", "application/json")
@@ -25,7 +23,7 @@ interface GetCurrentExchangeRateAbility {
                                 }]
                             }
                             """.trimIndent(),
-                        ),
+                        ).withStatus(200),
                 ),
         )
     }

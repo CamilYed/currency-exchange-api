@@ -1,9 +1,18 @@
-package camilyed.github.io.currencyexchangeapi.config
+@file:Suppress("UNCHECKED_CAST")
 
-import camilyed.github.io.currencyexchangeapi.application.inTransaction
+package camilyed.github.io.currencyexchangeapi.infrastructure
+
 import jakarta.annotation.PostConstruct
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.springframework.context.annotation.Configuration
+
+fun <T> executeInTransaction(block: () -> T): T {
+    return inTransaction(block as () -> Any) as T
+}
+
+private var inTransaction: (() -> Any) -> Any = { block ->
+    block()
+}
 
 @Configuration
 class TransactionManagerConfig {
@@ -11,7 +20,7 @@ class TransactionManagerConfig {
     @PostConstruct
     fun setupProductionTransaction() {
         inTransaction = { block ->
-            transaction { block() } // Using Exposed or any transaction manager
+            transaction { block() }
         }
     }
 }

@@ -36,12 +36,17 @@ val integrationTest: SourceSet =
 configurations[integrationTest.implementationConfigurationName].extendsFrom(configurations.testImplementation.get())
 configurations[integrationTest.runtimeOnlyConfigurationName].extendsFrom(configurations.testRuntimeOnly.get())
 
+dependencyManagement {
+    imports {
+        mavenBom("org.springframework.cloud:spring-cloud-dependencies:2022.0.4") // Dodanie BOM dla Spring Cloud
+    }
+}
+
 dependencies {
     implementation("io.github.microutils:kotlin-logging-jvm:3.0.5")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.2")
     implementation("org.jetbrains.exposed:exposed-core:0.55.0")
     implementation("org.jetbrains.exposed:exposed-java-time:0.55.0")
-//    implementation("org.jetbrains.exposed:exposed-kotlin-datetime:0.55.0")
     implementation("org.jetbrains.exposed:exposed-jdbc:0.55.0")
     implementation("javax.servlet:javax.servlet-api:4.0.1")
 
@@ -50,6 +55,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-jdbc")
+    implementation("io.github.openfeign:feign-jackson:12.4")
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign:3.1.2")
 
     // Spring Boot Test
@@ -112,4 +118,9 @@ ktlint {
         exclude("**/test/**")
         exclude("**/integrationTest/**")
     }
+}
+
+tasks.wrapper {
+    gradleVersion = "8.10.2"
+    distributionType = Wrapper.DistributionType.ALL
 }

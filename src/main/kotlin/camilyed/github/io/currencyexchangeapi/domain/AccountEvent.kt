@@ -13,4 +13,12 @@ sealed class AccountEvent(
         val owner: String,
         val initialBalancePln: BigDecimal,
     ) : AccountEvent(accountId, operationId)
+
+    data class PlnToUsdExchangeEvent(
+        override val accountId: UUID,
+        override val operationId: UUID,
+        val amountPln: BigDecimal,
+        val amountUsd: BigDecimal,
+        val exchangeRate: BigDecimal,
+    ) : AccountEvent(accountId, operationId)
 }

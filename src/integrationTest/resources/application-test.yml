@@ -1,5 +1,3 @@
-nbp:
-    url: http://localhost:${wiremock.server.port}/api/exchangerates/rates/A/USD
 
 spring:
     datasource:

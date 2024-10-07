@@ -47,24 +47,26 @@ class GlobalExceptionHandler {
 
     @ExceptionHandler(InvalidAmountException::class)
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
-    fun handleInvalidAmountException(ex: InvalidAmountException): ProblemDetails {
-        return ProblemDetails(
+    fun handleInvalidAmountException(ex: InvalidAmountException): ResponseEntity<ProblemDetails> {
+        val problemDetails = ProblemDetails(
             title = "Invalid Amount",
             status = HttpStatus.UNPROCESSABLE_ENTITY.value(),
             detail = "amount: " + ex.message,
             instance = null,
         )
+        return ResponseEntity(problemDetails, HttpStatus.UNPROCESSABLE_ENTITY)
     }
 
     @ExceptionHandler(InsufficientFundsException::class)
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
-    fun handleInsufficientFunds(ex: InsufficientFundsException): ProblemDetails {
-        return ProblemDetails(
+    fun handleInsufficientFunds(ex: InsufficientFundsException): ResponseEntity<ProblemDetails> {
+        val problemDetails = ProblemDetails(
             title = "Insufficient funds",
             status = HttpStatus.UNPROCESSABLE_ENTITY.value(),
             detail = "balance: " + ex.message,
             instance = null,
         )
+        return ResponseEntity(problemDetails, HttpStatus.UNPROCESSABLE_ENTITY)
     }
 }
 

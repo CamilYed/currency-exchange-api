@@ -12,7 +12,6 @@ import camilyed.github.io.currencyexchangeapi.testing.assertion.isOkResponse
 import camilyed.github.io.currencyexchangeapi.testing.assertion.isUnprocessableEntity
 import camilyed.github.io.currencyexchangeapi.testing.builders.CreateAccountJsonBuilder.Companion.aCreateAccount
 import camilyed.github.io.currencyexchangeapi.testing.builders.ExchangePlnToUsdJsonBuilder.Companion.anExchangePlnToUsd
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import java.util.UUID
@@ -22,11 +21,6 @@ class ExchangePlnToUsdIntegrationTest :
     CreateAccountAbility,
     ExchangePlnToUsdAbility,
     GetCurrentExchangeRateAbility {
-
-    @BeforeEach
-    fun setupSpec() {
-        currentExchangeRateIs("4.0")
-    }
 
     @Test
     fun `should exchange PLN to USD successfully`() {
@@ -109,6 +103,9 @@ class ExchangePlnToUsdIntegrationTest :
     fun `should return error when amount is zero`() {
         // given
         val accountId = thereIsAnAccount(aCreateAccount())
+
+        // and
+        currentExchangeRateIs("4.0")
 
         // when
         val response = exchangePlnToUsd(

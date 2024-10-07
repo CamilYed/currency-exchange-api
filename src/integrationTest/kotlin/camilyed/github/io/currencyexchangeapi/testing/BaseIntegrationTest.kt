@@ -8,7 +8,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.beans.factory.annotation.Autowired
@@ -35,6 +34,7 @@ class BaseIntegrationTest : MakeRequestAbility {
     @BeforeEach
     fun beforeEach() {
         wireMock.resetAll()
+        WireMock.reset()
         DatabaseCleaner.cleanAllTables()
     }
 
@@ -44,16 +44,11 @@ class BaseIntegrationTest : MakeRequestAbility {
 
     companion object {
         protected val wireMock = WireMockServer(0)
-            .apply {
-                start()
-                println("WireMock Started")
-            }
-            .also { WireMock.configureFor(it.port()) }
 
         @JvmStatic
         @DynamicPropertySource
         fun properties(registry: DynamicPropertyRegistry) {
-            registry.add("wiremock.server.port", wireMock::port)
+            registry.add("nbp.url") { "http://localhost:${wireMock.port()}/api/exchangerates/rates/A/USD" }
         }
 
         @JvmStatic
@@ -62,15 +57,20 @@ class BaseIntegrationTest : MakeRequestAbility {
             if (!wireMock.isRunning) {
                 wireMock.start()
                 WireMock.configureFor(wireMock.port())
-                System.clearProperty("wiremock.server.port")
+                println("WIREMOCK STARTED at port: ${wireMock.port()}")
             }
         }
 
-        @JvmStatic
-        @AfterAll
-        fun stopWireMockServer() {
-            wireMock.stop()
-            System.clearProperty("wiremock.server.port")
+        init {
+            Runtime.getRuntime().addShutdownHook(
+                Thread {
+                    if (wireMock.isRunning) {
+                        println("Shutting down WireMock server...")
+                        wireMock.stop()
+                        println("WireMock stopped")
+                    }
+                },
+            )
         }
     }
 }

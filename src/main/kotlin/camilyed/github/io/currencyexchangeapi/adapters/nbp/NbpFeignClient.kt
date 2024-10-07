@@ -1,22 +1,20 @@
 package camilyed.github.io.currencyexchangeapi.adapters.nbp
 
-import feign.Headers
-import org.springframework.cloud.openfeign.FeignClient
-import org.springframework.web.bind.annotation.GetMapping
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import feign.RequestLine
 import java.math.BigDecimal
 
-@FeignClient(name = "nbpClient", url = "\${nbp.url}")
 interface NbpFeignClient {
-
-    @GetMapping
-    @Headers("Accept: application/json")
+    @RequestLine("GET")
     fun getUsdToPlnRate(): NbpExchangeRateResponse
 }
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class NbpExchangeRateResponse(
     val rates: List<Rate>,
 )
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class Rate(
     val mid: BigDecimal,
 )

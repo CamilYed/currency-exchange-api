@@ -55,6 +55,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-jdbc")
+    implementation("io.github.openfeign:feign-jackson:12.4")
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign:3.1.2")
 
     // Spring Boot Test
@@ -117,4 +118,9 @@ ktlint {
         exclude("**/test/**")
         exclude("**/integrationTest/**")
     }
+}
+
+tasks.wrapper {
+    gradleVersion = "8.10.2"
+    distributionType = Wrapper.DistributionType.ALL
 }

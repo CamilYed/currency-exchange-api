@@ -23,7 +23,7 @@ interface GetCurrentExchangeRateAbility {
                                 }]
                             }
                             """.trimIndent(),
-                        ),
+                        ).withStatus(200),
                 ),
         )
     }

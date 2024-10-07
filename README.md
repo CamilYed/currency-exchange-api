@@ -1,31 +1,93 @@
+
 # Currency Exchange API (PLN <-> USD)
 
 ## Overview
 
 This is a Kotlin-based Spring Boot application that provides a REST API for creating currency accounts and performing currency exchanges between PLN (Polish Zloty) and USD (US Dollar). The exchange rates are retrieved from the National Bank of Poland (NBP) public API.
 
-## Functional Requirements
+The project follows **Domain-Driven Design (DDD)** principles, where core domain logic is encapsulated in domain aggregates, ensuring that the business logic is well-organized and scalable. The endpoints provided by the application are idempotent, ensuring consistency of operations, even when they are retried.
 
-1. The application exposes a REST API for creating currency accounts.
-2. When creating an account, the user must provide the initial balance in PLN.
-3. The user must also provide their full name (first and last name).
-4. The application generates a unique account identifier when a new account is created. This identifier is used in further API interactions.
-5. The application exposes a REST API for exchanging money between PLN and USD, fetching the current exchange rate from the public NBP API.
-6. The application exposes a REST API for retrieving account details, including the current balance in PLN and USD.
+## Features
 
-## Non-Functional Requirements
+1. **Account Management**:
+    - REST API for creating currency accounts.
+    - When creating an account, the user must provide an initial balance in PLN and their full name.
+    - A unique account identifier is generated for future interactions.
 
-1. The application is written in Kotlin and uses the Spring Boot framework.
-2. The application does not persist data after a restart (in-memory storage).
-3. The source code is hosted on a version control platform like GitHub, GitLab, or Bitbucket.
-4. The application is built using a build tool such as Maven or Gradle.
-5. Any unspecified details are left to the developer's discretion.
-6. If any questions arise, clarification should be requested by email.
+2. **Currency Exchange**:
+    - REST API for exchanging currencies between PLN and USD, using live exchange rates from the NBP API.
+
+3. **Balance Retrieval**:
+    - REST API for retrieving account details, including current balances in PLN and USD.
 
 ## Technologies
 
 - **Language**: Kotlin
 - **Framework**: Spring Boot
-- **Build tool**: Gradle
-- **Testing**: JUnit 5
-- **External API**: NBP public API for exchange rates [http://api.nbp.pl/](http://api.nbp.pl/)
+- **Build Tool**: Gradle
+- **External API**: NBP API for exchange rates
+- **Testing**: JUnit 5, tests based on the [Readable Tests by Example](https://blog.allegro.tech/2022/02/readable-tests-by-example.html) approach to improve readability and maintainability.
+
+## Architecture
+
+The application is structured according to **Domain-Driven Design (DDD)**. It contains well-defined aggregates that represent the key business entities, ensuring that domain logic and data consistency are managed centrally. Here's an example from the `Account` aggregate:
+
+```kotlin
+class Account(
+    val id: AccountId,
+    val name: String,
+    var balancePLN: BigDecimal,
+    var balanceUSD: BigDecimal
+) {
+    fun exchangeCurrency(amount: BigDecimal, exchangeRate: BigDecimal) {
+        // Business logic to handle currency exchange
+    }
+}
+```
+
+## Running the Application
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/CamilYed/currency-exchange-api.git
+   cd currency-exchange-api
+   ```
+
+2. Build the project:
+   ```bash
+   ./gradlew build
+   ```
+
+3. Run the application:
+   ```bash
+   ./gradlew bootRun
+   ```
+
+3. Run tests:
+   ```bash
+   ./gradlew check
+   ```
+   
+4. The application will be accessible at `http://localhost:8080`.
+
+## TODO
+
+The following features and tests are still missing or require improvements:
+
+1. **Missing REST API for Account Details**:
+    - Endpoint for retrieving account details (current balances in PLN and USD).
+    - Tests for the account details API.
+
+2. **Missing Exchange Endpoint (USD to PLN)**:
+    - An additional API endpoint for currency exchange from USD to PLN.
+    - Tests to cover this exchange scenario.
+
+3. **Optimistic Locking Tests**:
+    - Currently, there are no tests to validate how optimistic locking is handled during concurrent transactions.
+
+4. **Error Handling Tests**:
+    - Tests to handle scenarios where the NBP API is unavailable (e.g., simulate HTTP 500 responses and ensure that FeignClient retries or fallback mechanisms work as expected).
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

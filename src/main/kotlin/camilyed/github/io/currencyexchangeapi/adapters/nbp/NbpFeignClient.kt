@@ -1,5 +1,6 @@
 package camilyed.github.io.currencyexchangeapi.adapters.nbp
 
+import feign.Headers
 import org.springframework.cloud.openfeign.FeignClient
 import org.springframework.web.bind.annotation.GetMapping
 import java.math.BigDecimal
@@ -8,6 +9,7 @@ import java.math.BigDecimal
 interface NbpFeignClient {
 
     @GetMapping
+    @Headers("Accept: application/json")
     fun getUsdToPlnRate(): NbpExchangeRateResponse
 }
 

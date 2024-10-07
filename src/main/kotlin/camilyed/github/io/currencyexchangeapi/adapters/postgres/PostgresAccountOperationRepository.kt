@@ -38,13 +38,30 @@ class PostgresAccountOperationRepository(
                         it[amountPln] = event.initialBalancePln
                         it[amountUsd] = null
                         it[exchangeRate] = null
-                        it[description] = description(event)
+                        it[description] = accountCreatedDescription(event)
+                    }
+                }
+
+                is AccountEvent.PlnToUsdExchangeEvent -> {
+                    AccountOperationsTable.insert {
+                        it[id] = UUID.randomUUID()
+                        it[accountId] = event.accountId
+                        it[operationType] = "PLN_TO_USD"
+                        it[operationId] = event.operationId
+                        it[createdAt] = timestamp
+                        it[amountPln] = event.amountPln
+                        it[amountUsd] = event.amountUsd
+                        it[exchangeRate] = event.exchangeRate
+                        it[description] = exchangePlnToUsdDescription(event)
                     }
                 }
             }
         }
     }
 
-    private fun description(event: AccountEvent.AccountCreatedEvent) =
+    private fun accountCreatedDescription(event: AccountEvent.AccountCreatedEvent) =
         "Created account for ${event.owner} with initial balance of ${event.initialBalancePln} PLN"
+
+    private fun exchangePlnToUsdDescription(event: AccountEvent.PlnToUsdExchangeEvent) =
+        "Exchanged ${event.amountPln} PLN to ${event.amountUsd} USD at rate ${event.exchangeRate}"
 }

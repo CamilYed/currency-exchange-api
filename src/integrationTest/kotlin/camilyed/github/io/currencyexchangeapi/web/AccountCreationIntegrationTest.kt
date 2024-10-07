@@ -2,7 +2,6 @@ package camilyed.github.io.currencyexchangeapi.web
 
 import camilyed.github.io.currencyexchangeapi.testing.BaseIntegrationTest
 import camilyed.github.io.currencyexchangeapi.testing.abilties.CreateAccountAbility
-import camilyed.github.io.currencyexchangeapi.testing.abilties.GetCurrentExchangeRateAbility
 import camilyed.github.io.currencyexchangeapi.testing.assertion.hasProblemDetail
 import camilyed.github.io.currencyexchangeapi.testing.assertion.hasUUID
 import camilyed.github.io.currencyexchangeapi.testing.assertion.isBadRequest
@@ -14,8 +13,7 @@ import strikt.assertions.isEqualTo
 
 class AccountCreationIntegrationTest :
     BaseIntegrationTest(),
-    CreateAccountAbility,
-    GetCurrentExchangeRateAbility {
+    CreateAccountAbility {
 
     @Test
     fun `should create a new account`() {

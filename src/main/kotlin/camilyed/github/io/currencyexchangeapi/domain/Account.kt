@@ -17,7 +17,11 @@ class Account private constructor(
         require(balanceUsd.currency == "USD") { "USD balance must be in USD" }
     }
 
-    fun exchangePlnToUsd(amountPln: Money, exchangeRate: ExchangeRate) {
+    fun exchangePlnToUsd(
+        amountPln: Money,
+        exchangeRate: ExchangeRate,
+        operationId: UUID,
+    ) {
         require(!amountPln.isZero()) {
             throw InvalidAmountException("Amount must be greater than 0")
         }
@@ -30,6 +34,16 @@ class Account private constructor(
         val amountUsd = Money(exchangeRate.convertFromPln(amountPln.amount), "USD")
         balancePln -= amountPln
         balanceUsd += amountUsd
+
+        addEvent(
+            AccountEvent.PlnToUsdExchangeEvent(
+                accountId = id,
+                operationId = operationId,
+                amountPln = amountPln.amount,
+                amountUsd = amountUsd.amount,
+                exchangeRate = exchangeRate.rate,
+            ),
+        )
     }
 
     fun exchangeUsdToPln(amountUsd: Money, exchangeRate: ExchangeRate) {

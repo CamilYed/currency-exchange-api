@@ -1,7 +1,6 @@
 package camilyed.github.io.currencyexchangeapi.testing.assertion
 
-import com.fasterxml.jackson.core.type.TypeReference
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import camilyed.github.io.currencyexchangeapi.testing.utils.parseBodyToType
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import strikt.api.Assertion
@@ -18,7 +17,7 @@ fun <T> Assertion.Builder<ResponseEntity<T>>.isOkResponse(): Assertion.Builder<R
 
 fun Assertion.Builder<ResponseEntity<String>>.hasUUID(): Assertion.Builder<ResponseEntity<String>> =
     assert("should contain a valid UUID in 'id' field") {
-        val body = parseBodyToMap(it)
+        val body = parseBodyToType<Map<String, Any>>(it)
         val actualId =
             body["id"] as? String ?: fail("Response does not contain 'id' or 'id' is not a String")
         try {
@@ -38,12 +37,21 @@ fun <T> Assertion.Builder<ResponseEntity<T>>.isBadRequest(): Assertion.Builder<R
         }
     }
 
+fun <T> Assertion.Builder<ResponseEntity<T>>.isUnprocessableEntity(): Assertion.Builder<ResponseEntity<T>> =
+    assert("should have an UNPROCESSABLE ENTITY response status") {
+        if (it.statusCode == HttpStatus.UNPROCESSABLE_ENTITY) {
+            pass()
+        } else {
+            fail("Expected UNPROCESSABLE ENTITY, but got ${it.statusCode}")
+        }
+    }
+
 fun Assertion.Builder<ResponseEntity<String>>.hasProblemDetail(
     expectedField: String,
     expectedDetail: String,
 ): Assertion.Builder<ResponseEntity<String>> =
     assert("should contain problem detail, field '$expectedField' with value '$expectedDetail'") {
-        val body = parseBodyToMap(it)
+        val body = parseBodyToType<Map<String, Any>>(it)
         val actualDetail =
             body["detail"] as? String ?: fail("No 'detail' field in response body") as String
         if (actualDetail.contains("$expectedField: $expectedDetail")) {
@@ -57,9 +65,3 @@ fun Assertion.Builder<ResponseEntity<String>>.hasProblemDetail(
             )
         }
     }
-
-val objectMapper = jacksonObjectMapper()
-
-private fun parseBodyToMap(response: ResponseEntity<String>): Map<String, Any> {
-    return objectMapper.readValue(response.body!!, object : TypeReference<Map<String, Any>>() {})
-}

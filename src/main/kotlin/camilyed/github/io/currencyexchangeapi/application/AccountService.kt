@@ -8,7 +8,7 @@ import camilyed.github.io.currencyexchangeapi.domain.AccountRepository
 import camilyed.github.io.currencyexchangeapi.domain.AccountSnapshot
 import camilyed.github.io.currencyexchangeapi.domain.CreateAccountData
 import camilyed.github.io.currencyexchangeapi.domain.CurrentExchangeRateProvider
-import org.jetbrains.exposed.sql.transactions.transaction
+import camilyed.github.io.currencyexchangeapi.infrastructure.executeInTransaction
 import java.util.UUID
 
 class AccountService(
@@ -20,11 +20,11 @@ class AccountService(
     fun create(command: CreateAccountCommand): AccountSnapshot {
         val accountId = accountOperationRepository.findAccountIdBy(command.commandId)
         if (accountId != null) {
-            return transaction { findAccount(accountId).toSnapshot() }
+            return executeInTransaction { findAccount(accountId).toSnapshot() }
         }
         val id = repository.nextAccountId()
         val account = Account.createNewAccount(command.toCreateAccountData(id))
-        inTransaction {
+        executeInTransaction {
             repository.save(account)
             val events = account.getEvents()
             accountOperationRepository.save(events)
@@ -33,9 +33,21 @@ class AccountService(
     }
 
     fun exchangePlnToUsd(command: ExchangePlnToUsdCommand): AccountSnapshot {
-        val account = findAccount(command.accountId)
+        val accountId = accountOperationRepository.findAccountIdBy(command.commandId)
+        if (accountId != null) {
+            return executeInTransaction { findAccount(accountId).toSnapshot() }
+        }
+        val account = executeInTransaction { findAccount(command.accountId) }
         val currentExchange = currentExchangeRateProvider.currentExchange()
-        account.exchangePlnToUsd(Money.pln(command.amount), currentExchange)
+        account.exchangePlnToUsd(
+            amountPln = Money.pln(command.amount),
+            exchangeRate = currentExchange,
+            operationId = command.commandId,
+        )
+        executeInTransaction {
+            repository.save(account)
+            accountOperationRepository.save(account.getEvents())
+        }
         return account.toSnapshot()
     }
 

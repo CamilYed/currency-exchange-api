@@ -2,7 +2,7 @@ package camilyed.github.io.currencyexchangeapi.testing
 
 import camilyed.github.io.CurrencyExchangeApiApplication
 import camilyed.github.io.currencyexchangeapi.testing.abilties.MakeRequestAbility
-import camilyed.github.io.currencyexchangeapi.testing.postgres.PostgresInitializer
+import camilyed.github.io.currencyexchangeapi.testing.config.POSTGRES_SQL_CONTAINER
 import camilyed.github.io.currencyexchangeapi.testing.utils.DatabaseCleaner
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -13,13 +13,13 @@ import org.junit.jupiter.api.BeforeEach
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
 
 @ContextConfiguration(
-    initializers = [PostgresInitializer::class],
     classes = [CurrencyExchangeApiApplication::class],
 )
 @ActiveProfiles("test")
@@ -43,7 +43,11 @@ class BaseIntegrationTest : MakeRequestAbility {
     }
 
     companion object {
-        protected val wireMock = WireMockServer(0)
+
+        @ServiceConnection
+        val postgresSQLContainer = POSTGRES_SQL_CONTAINER
+
+        private val wireMock = WireMockServer(0)
 
         @JvmStatic
         @DynamicPropertySource
@@ -53,24 +57,55 @@ class BaseIntegrationTest : MakeRequestAbility {
 
         @JvmStatic
         @BeforeAll
-        fun startWireMock() {
+        fun start() {
+            startWiremock()
+            startPostgresContainer()
+        }
+
+        private fun startWiremock() {
             if (!wireMock.isRunning) {
+                println("Starting Wiremock...")
                 wireMock.start()
                 WireMock.configureFor(wireMock.port())
-                println("WIREMOCK STARTED at port: ${wireMock.port()}")
+                println("Wiremock started at port: ${wireMock.port()}")
+            }
+        }
+
+        private fun startPostgresContainer() {
+            if (!postgresSQLContainer.isRunning) {
+                println("Starting PostgresContainer...")
+                postgresSQLContainer.start()
+                println("PostgresContainer started")
             }
         }
 
         init {
+            addShutdownHooks()
+        }
+
+        private fun addShutdownHooks() {
             Runtime.getRuntime().addShutdownHook(
                 Thread {
-                    if (wireMock.isRunning) {
-                        println("Shutting down WireMock server...")
-                        wireMock.stop()
-                        println("WireMock stopped")
-                    }
+                    shutdownWiremock()
+                    shutdownPostgresContainer()
                 },
             )
+        }
+
+        private fun shutdownWiremock() {
+            if (wireMock.isRunning) {
+                println("Shutting down WireMock server...")
+                wireMock.stop()
+                println("WireMock stopped")
+            }
+        }
+
+        private fun shutdownPostgresContainer() {
+            if (postgresSQLContainer.isRunning) {
+                println("Shutting down PostgresContainer...")
+                postgresSQLContainer.stop()
+                println("PostgresContainer stopped")
+            }
         }
     }
 }

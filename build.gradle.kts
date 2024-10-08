@@ -58,7 +58,7 @@ dependencies {
     implementation("io.github.openfeign:feign-jackson:12.4")
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign:3.1.2")
     implementation("org.postgresql:postgresql:42.3.1")
-    implementation("org.testcontainers:postgresql:1.20.2")
+    implementation("org.flywaydb:flyway-core")
 
     // Spring Boot Test
     testImplementation("org.springframework.boot:spring-boot-starter-test")
@@ -74,7 +74,10 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.wiremock:wiremock:3.9.1")
     testImplementation("org.testcontainers:junit-jupiter:1.20.2")
-    testImplementation("org.flywaydb:flyway-core")
+    testImplementation("org.testcontainers:testcontainers:1.20.2")
+    testImplementation("org.springframework.boot:spring-boot-testcontainers")
+    testImplementation("org.testcontainers:postgresql:1.20.2")
+
     testRuntimeOnly("org.postgresql:postgresql")
 }
 
@@ -124,4 +127,14 @@ ktlint {
 tasks.wrapper {
     gradleVersion = "8.10.2"
     distributionType = Wrapper.DistributionType.ALL
+}
+
+tasks.register<JavaExec>("runDev") {
+    group = "application"
+    description = "Run the application with DevelopmentTimeConfig and 'test' profile"
+    mainClass.set("camilyed.github.io.currencyexchangeapi.TestCurrencyExchangeApiApplicationKt")
+    classpath = sourceSets["main"].runtimeClasspath + sourceSets["integrationTest"].runtimeClasspath
+    args = listOf()
+    jvmArgs = listOf()
+    environment("SPRING_PROFILES_ACTIVE", "test")
 }

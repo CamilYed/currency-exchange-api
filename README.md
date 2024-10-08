@@ -247,9 +247,9 @@ In this example, the test is written in a readable DSL style, ensuring clarity a
    ./gradlew build
    ```
 
-3. Run the application:
+3. Run the application in development mode:
    ```bash
-   ./gradlew bootRun
+   ./gradlew runDev
    ```
 
 4. The application will be accessible at `http://localhost:8080`.

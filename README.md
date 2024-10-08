@@ -31,6 +31,47 @@ The application is designed with aggregates, domain events, and history tracking
 
 The project follows **Domain-Driven Design (DDD)** principles, which structure the application around domain aggregates that encapsulate business rules and behavior. This approach ensures that core business logic is always centralized and preserved. Below is an example of how the `Account` aggregate works, particularly focusing on currency exchange operations.
 
+### Transaction Management Example (Lambda):
+Transaction management is handled using a lambda function that wraps database operations in a transactional context.
+
+```kotlin
+fun <T> executeInTransaction(block: () -> T): T {
+    return inTransaction(block as () -> Any) as T
+}
+
+private var inTransaction: (() -> Any) -> Any = { block -> block() }
+
+@Configuration
+class TransactionManagerConfig {
+
+    @PostConstruct
+    fun setupProductionTransaction() {
+        inTransaction = { block -> transaction { block() } }
+    }
+}
+```
+
+#### Example from `AccountService`:
+
+```kotlin
+fun create(command: CreateAccountCommand): AccountSnapshot {
+    val accountId = accountOperationRepository.findAccountIdBy(command.commandId)
+    if (accountId != null) {
+        return executeInTransaction { findAccount(accountId).toSnapshot() }
+    }
+    val id = repository.nextAccountId()
+    val account = Account.createNewAccount(command.toCreateAccountData(id))
+    executeInTransaction {
+        repository.save(account)
+        val events = account.getEvents()
+        accountOperationRepository.save(events)
+    }
+    return account.toSnapshot()
+}
+```
+
+This setup is used in the `AccountService` class, for example, during account creation and currency exchange.
+
 ### Example of the `Account` Aggregate (Currency Exchange):
 
 ```kotlin

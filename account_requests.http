@@ -1,0 +1,39 @@
+### Step 1: Generate X-Request-Id (UUID for the scenario)
+@requestId = {{uuid}}  // Automatically generates a valid UUID for X-Request-Id
+
+### Step 2: Create a new account (capture the accountId from the response)
+POST http://localhost:8090/api/accounts
+Content-Type: application/json
+X-Request-Id: 550e8400-e29b-41d4-a716-446655440000  // Use the generated requestId
+
+{
+    "owner": "John Doe",
+    "initialBalance": "1000.00"
+}
+
+### Capture the accountId from the response
+> {%
+client.test("Status Code is 201", function() {
+  client.assert(response.status === 201, "Expected status code 201, but got " + response.status);
+});
+
+var jsonData = JSON.parse(response.body);
+client.global.set("accountId", jsonData.id); // Save the accountId globally for use in the next request
+%}
+
+
+### Step 3: Exchange PLN to USD (use captured accountId)
+PUT http://localhost:8090/api/accounts/exchange-pln-to-usd
+Content-Type: application/json
+X-Request-Id: 550e8400-e29b-41d4-a716-446655449999
+
+{
+  "accountId": "f0cf47c7-24d8-40ff-9a14-5c935596f7e7",
+  "amount": "100.00"
+}
+
+> {%
+    client.test("Status Code is 200", function() {
+        client.assert(response.status === 200, "Expected status code 200, but got " + response.status);
+    });
+%}

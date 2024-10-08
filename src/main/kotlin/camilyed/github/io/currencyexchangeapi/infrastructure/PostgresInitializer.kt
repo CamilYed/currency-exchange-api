@@ -1,16 +1,24 @@
-package camilyed.github.io.currencyexchangeapi.testing.postgres
+package camilyed.github.io.currencyexchangeapi.infrastructure
 
 import mu.KotlinLogging
+import org.springframework.beans.factory.DisposableBean
 import org.springframework.context.ApplicationContextInitializer
 import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.context.annotation.Profile
 import org.testcontainers.containers.PostgreSQLContainer
 
 @Profile("!test")
-class PostgresInitializer : ApplicationContextInitializer<ConfigurableApplicationContext> {
+class PostgresInitializer : ApplicationContextInitializer<ConfigurableApplicationContext>, DisposableBean {
     override fun initialize(applicationContext: ConfigurableApplicationContext) {
         log.info("Overriding system properties")
         overrideSystemProperties()
+    }
+
+    override fun destroy() {
+        if (pg.isRunning) {
+            log.info("Stopping PostgreSQL container...")
+            pg.stop()
+        }
     }
 
     private fun overrideSystemProperties() {

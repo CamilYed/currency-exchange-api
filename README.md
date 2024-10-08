@@ -117,21 +117,6 @@ class Account private constructor(
         )
     }
 
-    fun exchangeUsdToPln(amountUsd: Money, exchangeRate: ExchangeRate) {
-        require(!amountUsd.isZero()) {
-            throw InvalidAmountException("Amount must be greater than 0")
-        }
-        require(amountUsd <= balanceUsd) {
-            throw InsufficientFundsException(
-                "Insufficient USD balance",
-            )
-        }
-
-        val amountPln = Money(exchangeRate.convertToPln(amountUsd.amount), "PLN")
-        balanceUsd -= amountUsd
-        balancePln += amountPln
-    }
-
     private fun addEvent(event: AccountEvent) {
         events.add(event)
     }

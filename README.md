@@ -3,47 +3,210 @@
 
 ## Overview
 
-This is a Kotlin-based Spring Boot application that provides a REST API for creating currency accounts and performing currency exchanges between PLN (Polish Zloty) and USD (US Dollar). The exchange rates are retrieved from the National Bank of Poland (NBP) public API.
+This is a Kotlin-based Spring Boot application implementing a domain-driven design (DDD) architecture to handle currency exchange operations between PLN (Polish Zloty) and USD (US Dollar). The exchange rates are retrieved from the National Bank of Poland (NBP) API.
 
-The project follows **Domain-Driven Design (DDD)** principles, where core domain logic is encapsulated in domain aggregates, ensuring that the business logic is well-organized and scalable. The endpoints provided by the application are idempotent, ensuring consistency of operations, even when they are retried.
+The application is designed with aggregates, domain events, and history tracking of account operations, ensuring idempotent, consistent, and traceable transactions.
 
 ## Features
 
 1. **Account Management**:
-    - REST API for creating currency accounts.
-    - When creating an account, the user must provide an initial balance in PLN and their full name.
-    - A unique account identifier is generated for future interactions.
+    - API for creating new currency accounts.
+    - Each account tracks balances in PLN and USD.
+    - Every account creation requires a unique `X-Request-Id`, ensuring idempotency.
 
 2. **Currency Exchange**:
-    - REST API for exchanging currencies between PLN and USD, using live exchange rates from the NBP API.
+    - API to exchange PLN to USD based on live exchange rates from NBP.
+    - Each exchange operation is idempotent using `X-Request-Id` as a unique operation identifier.
+    - Exchange history is recorded as domain events.
 
-3. **Balance Retrieval**:
-    - REST API for retrieving account details, including current balances in PLN and USD.
+3. **Operation History**:
+    - The application tracks the full history of account operations, including currency exchanges, ensuring traceability of all actions.
+    - Events such as account creation and currency exchanges are stored as immutable records.
 
-## Technologies
-
-- **Language**: Kotlin
-- **Framework**: Spring Boot
-- **Build Tool**: Gradle
-- **External API**: NBP API for exchange rates
-- **Testing**: JUnit 5, tests based on the [Readable Tests by Example](https://blog.allegro.tech/2022/02/readable-tests-by-example.html) approach to improve readability and maintainability.
+4. **Resiliency**:
+    - Built-in error handling for NBP API unavailability using FeignClient retries.
+    - Idempotency ensures consistent results across retries or repeated operations.
 
 ## Architecture
 
-The application is structured according to **Domain-Driven Design (DDD)**. It contains well-defined aggregates that represent the key business entities, ensuring that domain logic and data consistency are managed centrally. Here's an example from the `Account` aggregate:
+The project follows **Domain-Driven Design (DDD)** principles, which structure the application around domain aggregates that encapsulate business rules and behavior. This approach ensures that core business logic is always centralized and preserved. Below is an example of how the `Account` aggregate works, particularly focusing on currency exchange operations.
+
+### Example of the `Account` Aggregate (Currency Exchange):
 
 ```kotlin
-class Account(
-    val id: AccountId,
-    val name: String,
-    var balancePLN: BigDecimal,
-    var balanceUSD: BigDecimal
+class Account private constructor(
+    private val id: UUID,
+    private val owner: String,
+    private var balancePln: Money = Money(BigDecimal.ZERO, "PLN"),
+    private var balanceUsd: Money = Money(BigDecimal.ZERO, "USD"),
 ) {
-    fun exchangeCurrency(amount: BigDecimal, exchangeRate: BigDecimal) {
-        // Business logic to handle currency exchange
+    private val events = mutableListOf<AccountEvent>()
+
+    init {
+        require(balancePln.currency == "PLN") { "PLN balance must be in PLN" }
+        require(balanceUsd.currency == "USD") { "USD balance must be in USD" }
+    }
+
+    fun exchangePlnToUsd(
+        amountPln: Money,
+        exchangeRate: ExchangeRate,
+        operationId: UUID,
+    ) {
+        require(!amountPln.isZero()) {
+            throw InvalidAmountException("Amount must be greater than 0")
+        }
+        require(amountPln <= balancePln) {
+            throw InsufficientFundsException(
+                "Insufficient PLN balance",
+            )
+        }
+
+        val amountUsd = Money(exchangeRate.convertFromPln(amountPln.amount), "USD")
+        balancePln -= amountPln
+        balanceUsd += amountUsd
+
+        addEvent(
+            AccountEvent.PlnToUsdExchangeEvent(
+                accountId = id,
+                operationId = operationId,
+                amountPln = amountPln.amount,
+                amountUsd = amountUsd.amount,
+                exchangeRate = exchangeRate.rate,
+            ),
+        )
+    }
+
+    fun exchangeUsdToPln(amountUsd: Money, exchangeRate: ExchangeRate) {
+        require(!amountUsd.isZero()) {
+            throw InvalidAmountException("Amount must be greater than 0")
+        }
+        require(amountUsd <= balanceUsd) {
+            throw InsufficientFundsException(
+                "Insufficient USD balance",
+            )
+        }
+
+        val amountPln = Money(exchangeRate.convertToPln(amountUsd.amount), "PLN")
+        balanceUsd -= amountUsd
+        balancePln += amountPln
+    }
+
+    private fun addEvent(event: AccountEvent) {
+        events.add(event)
+    }
+
+    fun getEvents(): List<AccountEvent> = events.toList()
+
+    fun toSnapshot(): AccountSnapshot {
+        return AccountSnapshot(
+            id = id,
+            owner = owner,
+            balancePln = balancePln.amount,
+            balanceUsd = balanceUsd.amount,
+        )
+    }
+
+    companion object {
+        fun createNewAccount(data: CreateAccountData): Account {
+            val account = Account(
+                id = data.id,
+                owner = data.owner,
+                balancePln = Money.pln(data.initialBalancePln),
+                balanceUsd = Money.usd(BigDecimal.ZERO),
+            )
+            account.addEvent(
+                AccountEvent.AccountCreatedEvent(
+                    accountId = data.id,
+                    operationId = data.operationId,
+                    owner = data.owner,
+                    initialBalancePln = data.initialBalancePln,
+                ),
+            )
+            return account
+        }
+
+        fun fromSnapshot(snapshot: AccountSnapshot): Account {
+            return Account(
+                id = snapshot.id,
+                owner = snapshot.owner,
+                balancePln = Money.pln(snapshot.balancePln),
+                balanceUsd = Money.usd(snapshot.balanceUsd),
+            )
+        }
     }
 }
+
+data class AccountSnapshot(
+    val id: UUID,
+    val owner: String,
+    val balancePln: BigDecimal,
+    val balanceUsd: BigDecimal,
+)
 ```
+
+### Domain Events
+
+Events such as `PlnToUsdExchangeEvent` are stored in the history of the account to maintain a record of all operations performed.
+
+```kotlin
+sealed class AccountEvent(
+    open val accountId: UUID,
+    open val operationId: UUID,
+) {
+    data class AccountCreatedEvent(
+        override val accountId: UUID,
+        override val operationId: UUID,
+        val owner: String,
+        val initialBalancePln: BigDecimal,
+    ) : AccountEvent(accountId, operationId)
+
+    data class PlnToUsdExchangeEvent(
+        override val accountId: UUID,
+        override val operationId: UUID,
+        val amountPln: BigDecimal,
+        val amountUsd: BigDecimal,
+        val exchangeRate: BigDecimal,
+    ) : AccountEvent(accountId, operationId)
+}
+```
+
+These events allow us to reconstruct the account's state and trace every operation performed.
+
+### Idempotency
+
+All key operations (like account creation and currency exchange) are idempotent, meaning that repeated requests with the same `X-Request-Id` will yield the same result without duplicating the action.
+
+## Tests
+
+The project includes integration tests that use a DSL to improve readability and maintainability, inspired by [Allegro's blog post on readable tests](https://blog.allegro.tech/2022/02/readable-tests-by-example.html).
+
+### Example of a Test with DSL:
+
+```kotlin
+@Test
+fun `should exchange PLN to USD successfully`() {
+    // given
+    val accountId = thereIsAnAccount(aCreateAccount().withInitialBalance("1000.00"))
+
+    // and
+    currentExchangeRateIs("4.0")
+
+    // when
+    val response = exchangePlnToUsd(
+        anExchangePlnToUsd()
+            .withAccountId(accountId)
+            .withAmount("400"),
+    )
+
+    // then
+    expectThat(response)
+        .isOkResponse()
+        .hasPlnAmount("600.00")
+        .hasUsdAmount("100.00")
+}
+```
+
+In this example, the test is written in a readable DSL style, ensuring clarity and maintaining a focus on business logic rather than technical details.
 
 ## Running the Application
 
@@ -63,31 +226,67 @@ class Account(
    ./gradlew bootRun
    ```
 
-3. Run tests:
-   ```bash
-   ./gradlew check
-   ```
-   
 4. The application will be accessible at `http://localhost:8080`.
+
+## Running Tests
+
+To run the test suite, including the integration tests, use:
+
+```bash
+./gradlew check
+```
+
+This will execute all the tests and ensure that the application is functioning as expected.
+
+## HTTP Request Files
+
+The project includes HTTP request files that can be used in IntelliJ IDEA for manual testing. These files contain pre-built requests for creating accounts and performing currency exchanges.
+
+### Example Request - Create Account:
+```http
+POST http://localhost:8080/api/accounts
+Content-Type: application/json
+X-Request-Id: {{requestId}}
+
+{
+  "owner": "John Doe",
+  "initialBalance": "1000.00"
+}
+```
+
+### Example Request - Exchange PLN to USD:
+```http
+PUT http://localhost:8080/api/accounts/exchange-pln-to-usd
+Content-Type: application/json
+X-Request-Id: {{requestId}}
+
+{
+  "accountId": "{{accountId}}",
+  "amount": "100.00"
+}
+```
+
+These requests can be found in the `http-requests` directory and executed directly in IntelliJ IDEA for quick manual testing.
 
 ## TODO
 
 The following features and tests are still missing or require improvements:
 
-1. **Missing REST API for Account Details**:
-    - Endpoint for retrieving account details (current balances in PLN and USD).
+1. **REST API for Account Details**:
+    - Endpoint for retrieving account details, including current balances in PLN and USD.
     - Tests for the account details API.
 
-2. **Missing Exchange Endpoint (USD to PLN)**:
+2. **Missing USD to PLN Exchange Endpoint**:
     - An additional API endpoint for currency exchange from USD to PLN.
     - Tests to cover this exchange scenario.
 
 3. **Optimistic Locking Tests**:
-    - Currently, there are no tests to validate how optimistic locking is handled during concurrent transactions.
+    - Tests to validate optimistic locking during concurrent transactions.
 
 4. **Error Handling Tests**:
-    - Tests to handle scenarios where the NBP API is unavailable (e.g., simulate HTTP 500 responses and ensure that FeignClient retries or fallback mechanisms work as expected).
+    - Tests to ensure that when the NBP API is unavailable, proper error handling and retry mechanisms work as expected.
 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+

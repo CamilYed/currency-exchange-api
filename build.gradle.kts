@@ -57,6 +57,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-jdbc")
     implementation("io.github.openfeign:feign-jackson:12.4")
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign:3.1.2")
+    implementation("org.postgresql:postgresql:42.3.1")
+    implementation("org.testcontainers:postgresql:1.20.2")
 
     // Spring Boot Test
     testImplementation("org.springframework.boot:spring-boot-starter-test")
@@ -72,7 +74,6 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.wiremock:wiremock:3.9.1")
     testImplementation("org.testcontainers:junit-jupiter:1.20.2")
-    testImplementation("org.testcontainers:postgresql:1.20.2")
     testImplementation("org.flywaydb:flyway-core")
     testRuntimeOnly("org.postgresql:postgresql")
 }

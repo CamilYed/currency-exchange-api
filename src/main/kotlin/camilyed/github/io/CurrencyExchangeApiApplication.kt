@@ -1,8 +1,9 @@
 package camilyed.github.io
 
+import camilyed.github.io.currencyexchangeapi.infrastructure.PostgresInitializer
+import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration
 import org.springframework.boot.autoconfigure.SpringBootApplication
-import org.springframework.boot.runApplication
 import org.springframework.cloud.openfeign.EnableFeignClients
 import org.springframework.cloud.openfeign.FeignAutoConfiguration
 
@@ -12,5 +13,7 @@ import org.springframework.cloud.openfeign.FeignAutoConfiguration
 class CurrencyExchangeApiApplication
 
 fun main(args: Array<String>) {
-    runApplication<CurrencyExchangeApiApplication>(*args)
+    val application = SpringApplication(CurrencyExchangeApiApplication::class.java)
+    application.addInitializers(PostgresInitializer())
+    application.run(*args)
 }

@@ -128,3 +128,13 @@ tasks.wrapper {
     gradleVersion = "8.10.2"
     distributionType = Wrapper.DistributionType.ALL
 }
+
+tasks.register<JavaExec>("runDev") {
+    group = "application"
+    description = "Run the application with DevelopmentTimeConfig and 'test' profile"
+    mainClass.set("camilyed.github.io.currencyexchangeapi.TestCurrencyExchangeApiApplicationKt")
+    classpath = sourceSets["main"].runtimeClasspath + sourceSets["integrationTest"].runtimeClasspath
+    args = listOf()
+    jvmArgs = listOf()
+    environment("SPRING_PROFILES_ACTIVE", "test")
+}

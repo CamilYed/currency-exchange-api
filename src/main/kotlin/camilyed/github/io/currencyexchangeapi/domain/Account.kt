@@ -61,10 +61,6 @@ class Account private constructor(
         balancePln += amountPln
     }
 
-    private fun addEvent(event: AccountEvent) {
-        events.add(event)
-    }
-
     fun getEvents(): List<AccountEvent> = events.toList()
 
     fun toSnapshot(): AccountSnapshot {
@@ -74,6 +70,10 @@ class Account private constructor(
             balancePln = balancePln.amount,
             balanceUsd = balanceUsd.amount,
         )
+    }
+
+    private fun addEvent(event: AccountEvent) {
+        events.add(event)
     }
 
     companion object {

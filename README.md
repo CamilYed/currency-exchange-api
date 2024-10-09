@@ -35,18 +35,22 @@ The project follows **Domain-Driven Design (DDD)** principles, which structure t
 Transaction management is handled using a lambda function that wraps database operations in a transactional context.
 
 ```kotlin
-fun <T> executeInTransaction(block: () -> T): T {
-    return inTransaction(block as () -> Any) as T
+fun <T> inTransaction(block: () -> T): T {
+    return executeInTransaction(block as () -> Any) as T
 }
 
-private var inTransaction: (() -> Any) -> Any = { block -> block() }
+private var executeInTransaction: (() -> Any) -> Any = { block ->
+    block()
+}
 
 @Configuration
 class TransactionManagerConfig {
 
     @PostConstruct
     fun setupProductionTransaction() {
-        inTransaction = { block -> transaction { block() } }
+        executeInTransaction = { block ->
+            transaction { block() }
+        }
     }
 }
 ```
@@ -61,7 +65,7 @@ fun create(command: CreateAccountCommand): AccountSnapshot {
     }
     val id = repository.nextAccountId()
     val account = Account.createNewAccount(command.toCreateAccountData(id))
-    executeInTransaction {
+    inTransaction {
         repository.save(account)
         val events = account.getEvents()
         accountOperationRepository.save(events)

@@ -35,18 +35,22 @@ The project follows **Domain-Driven Design (DDD)** principles, which structure t
 Transaction management is handled using a lambda function that wraps database operations in a transactional context.
 
 ```kotlin
-fun <T> executeInTransaction(block: () -> T): T {
-    return inTransaction(block as () -> Any) as T
+fun <T> inTransaction(block: () -> T): T {
+    return executeInTransaction(block as () -> Any) as T
 }
 
-private var inTransaction: (() -> Any) -> Any = { block -> block() }
+private var executeInTransaction: (() -> Any) -> Any = { block ->
+    block()
+}
 
 @Configuration
 class TransactionManagerConfig {
 
     @PostConstruct
     fun setupProductionTransaction() {
-        inTransaction = { block -> transaction { block() } }
+        executeInTransaction = { block ->
+            transaction { block() }
+        }
     }
 }
 ```
@@ -55,13 +59,13 @@ class TransactionManagerConfig {
 
 ```kotlin
 fun create(command: CreateAccountCommand): AccountSnapshot {
-    val accountId = accountOperationRepository.findAccountIdBy(command.commandId)
+    val accountId = accountOperationRepository.findAccountIdBy(command.operationId)
     if (accountId != null) {
-        return executeInTransaction { findAccount(accountId).toSnapshot() }
+        return inTransaction { findAccount(accountId).toSnapshot() }
     }
     val id = repository.nextAccountId()
     val account = Account.createNewAccount(command.toCreateAccountData(id))
-    executeInTransaction {
+    inTransaction {
         repository.save(account)
         val events = account.getEvents()
         accountOperationRepository.save(events)
@@ -75,8 +79,14 @@ This setup is used in the `AccountService` class, for example, during account cr
 ### Example of the `Account` Aggregate (Currency Exchange):
 
 ```kotlin
+package camilyed.github.io.currencyexchangeapi.domain
+
+import camilyed.github.io.common.Money
+import java.math.BigDecimal
+import java.util.UUID
+
 class Account private constructor(
-    private val id: UUID,
+    private val id: AccountId,
     private val owner: String,
     private var balancePln: Money = Money(BigDecimal.ZERO, "PLN"),
     private var balanceUsd: Money = Money(BigDecimal.ZERO, "USD"),
@@ -91,7 +101,7 @@ class Account private constructor(
     fun exchangePlnToUsd(
         amountPln: Money,
         exchangeRate: ExchangeRate,
-        operationId: UUID,
+        operationId: OperationId,
     ) {
         require(!amountPln.isZero()) {
             throw InvalidAmountException("Amount must be greater than 0")
@@ -108,7 +118,7 @@ class Account private constructor(
 
         addEvent(
             AccountEvent.PlnToUsdExchangeEvent(
-                accountId = id,
+                accountId = id.value,
                 operationId = operationId,
                 amountPln = amountPln.amount,
                 amountUsd = amountUsd.amount,
@@ -117,25 +127,40 @@ class Account private constructor(
         )
     }
 
-    private fun addEvent(event: AccountEvent) {
-        events.add(event)
+    fun exchangeUsdToPln(amountUsd: Money, exchangeRate: ExchangeRate) {
+        require(!amountUsd.isZero()) {
+            throw InvalidAmountException("Amount must be greater than 0")
+        }
+        require(amountUsd <= balanceUsd) {
+            throw InsufficientFundsException(
+                "Insufficient USD balance",
+            )
+        }
+
+        val amountPln = Money(exchangeRate.convertToPln(amountUsd.amount), "PLN")
+        balanceUsd -= amountUsd
+        balancePln += amountPln
     }
 
     fun getEvents(): List<AccountEvent> = events.toList()
 
     fun toSnapshot(): AccountSnapshot {
         return AccountSnapshot(
-            id = id,
+            id = id.value,
             owner = owner,
             balancePln = balancePln.amount,
             balanceUsd = balanceUsd.amount,
         )
     }
 
+    private fun addEvent(event: AccountEvent) {
+        events.add(event)
+    }
+
     companion object {
         fun createNewAccount(data: CreateAccountData): Account {
             val account = Account(
-                id = data.id,
+                id = AccountId(data.id),
                 owner = data.owner,
                 balancePln = Money.pln(data.initialBalancePln),
                 balanceUsd = Money.usd(BigDecimal.ZERO),
@@ -153,7 +178,7 @@ class Account private constructor(
 
         fun fromSnapshot(snapshot: AccountSnapshot): Account {
             return Account(
-                id = snapshot.id,
+                id = AccountId(snapshot.id),
                 owner = snapshot.owner,
                 balancePln = Money.pln(snapshot.balancePln),
                 balanceUsd = Money.usd(snapshot.balanceUsd),
@@ -177,23 +202,24 @@ Events such as `PlnToUsdExchangeEvent` are stored in the history of the account 
 ```kotlin
 sealed class AccountEvent(
     open val accountId: UUID,
-    open val operationId: UUID,
+    open val operationId: OperationId,
 ) {
     data class AccountCreatedEvent(
         override val accountId: UUID,
-        override val operationId: UUID,
+        override val operationId: OperationId,
         val owner: String,
         val initialBalancePln: BigDecimal,
     ) : AccountEvent(accountId, operationId)
 
     data class PlnToUsdExchangeEvent(
         override val accountId: UUID,
-        override val operationId: UUID,
+        override val operationId: OperationId,
         val amountPln: BigDecimal,
         val amountUsd: BigDecimal,
         val exchangeRate: BigDecimal,
     ) : AccountEvent(accountId, operationId)
 }
+
 ```
 
 These events allow us to reconstruct the account's state and trace every operation performed.
@@ -201,6 +227,15 @@ These events allow us to reconstruct the account's state and trace every operati
 ### Idempotency
 
 All key operations (like account creation and currency exchange) are idempotent, meaning that repeated requests with the same `X-Request-Id` will yield the same result without duplicating the action.
+
+### Secure UUID Validation for `OperationId`
+
+In both account creation and currency exchange operations, the application enforces secure UUID validation for the `X-Request-Id` header. This ensures that all operations are identified with cryptographically secure UUIDs, preventing the use of weak or predictable identifiers.
+
+- **Why secure UUIDs?**: Ensuring that `X-Request-Id` is generated securely helps protect against potential misuse of UUIDs that could be guessed or reused inappropriately.
+- **Validation**: UUIDs passed in the `X-Request-Id` header are validated using entropy checks and other criteria to verify their randomness. If the UUID is deemed insecure, the operation is rejected with a `400 Bad Request` status, ensuring the integrity of the system.
+
+This mechanism adds an additional layer of security, making sure that every operation (such as account creation and currency exchanges) is uniquely and safely identified.
 
 ## Tests
 
@@ -252,7 +287,7 @@ In this example, the test is written in a readable DSL style, ensuring clarity a
    ./gradlew runDev
    ```
 
-4. The application will be accessible at `http://localhost:8080`.
+4. The application will be accessible at `http://localhost:8090`.
 
 ## Running Tests
 

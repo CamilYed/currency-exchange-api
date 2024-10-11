@@ -174,4 +174,24 @@ class ExchangePlnToUsdIntegrationTest :
             .hasPlnAmount("600.00")
             .hasUsdAmount("100.00")
     }
+
+    @Test
+    fun `should return error if X-Request-Id is insecure`() {
+        // given
+        val insecureUUID = "00000000-0000-0000-0000-000000000000"
+
+        // when
+        val response = exchangePlnToUsd(
+            anExchangePlnToUsd()
+                .withXRequestId(insecureUUID),
+        )
+
+        // then
+        expectThat(response)
+            .isBadRequest()
+            .hasProblemDetail(
+                "X-Request-Id",
+                "Insecure operation: UUID $insecureUUID does not meet security requirements.",
+            )
+    }
 }

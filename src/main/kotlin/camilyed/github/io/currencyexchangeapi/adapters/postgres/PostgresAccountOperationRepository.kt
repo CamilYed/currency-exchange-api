@@ -2,6 +2,7 @@ package camilyed.github.io.currencyexchangeapi.adapters.postgres
 
 import camilyed.github.io.currencyexchangeapi.domain.AccountEvent
 import camilyed.github.io.currencyexchangeapi.domain.AccountOperationRepository
+import camilyed.github.io.currencyexchangeapi.domain.OperationId
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.springframework.stereotype.Component
@@ -14,11 +15,11 @@ class PostgresAccountOperationRepository(
     private val clock: Clock,
 ) : AccountOperationRepository {
 
-    override fun findAccountIdBy(operationId: UUID): UUID? {
+    override fun findAccountIdBy(operationId: OperationId): UUID? {
         return transaction {
             AccountOperationsTable
                 .select(AccountOperationsTable.accountId)
-                .where { AccountOperationsTable.operationId eq operationId }
+                .where { AccountOperationsTable.operationId eq operationId.value }
                 .map { it[AccountOperationsTable.accountId] }
                 .singleOrNull()
         }
@@ -33,7 +34,7 @@ class PostgresAccountOperationRepository(
                         it[id] = UUID.randomUUID()
                         it[accountId] = event.accountId
                         it[operationType] = "CREATE_ACCOUNT"
-                        it[operationId] = event.operationId
+                        it[operationId] = event.operationId.value
                         it[createdAt] = timestamp
                         it[amountPln] = event.initialBalancePln
                         it[amountUsd] = null
@@ -47,7 +48,7 @@ class PostgresAccountOperationRepository(
                         it[id] = UUID.randomUUID()
                         it[accountId] = event.accountId
                         it[operationType] = "PLN_TO_USD"
-                        it[operationId] = event.operationId
+                        it[operationId] = event.operationId.value
                         it[createdAt] = timestamp
                         it[amountPln] = event.amountPln
                         it[amountUsd] = event.amountUsd

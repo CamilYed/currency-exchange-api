@@ -1,5 +1,6 @@
 package camilyed.github.io.currencyexchangeapi.infrastructure
 
+import camilyed.github.io.currencyexchangeapi.domain.InsecureOperationException
 import camilyed.github.io.currencyexchangeapi.domain.InsufficientFundsException
 import camilyed.github.io.currencyexchangeapi.domain.InvalidAmountException
 import jakarta.servlet.http.HttpServletRequest
@@ -67,6 +68,20 @@ class GlobalExceptionHandler {
             instance = null,
         )
         return ResponseEntity(problemDetails, HttpStatus.UNPROCESSABLE_ENTITY)
+    }
+
+    @ExceptionHandler(InsecureOperationException::class)
+    fun handleInsecureOperation(
+        ex: InsecureOperationException,
+        request: HttpServletRequest,
+    ): ResponseEntity<ProblemDetails> {
+        val problemDetails = ProblemDetails(
+            title = "Insecure Operation",
+            status = HttpStatus.BAD_REQUEST.value(),
+            detail = "X-Request-Id: ${ex.message}",
+            instance = request.requestURI,
+        )
+        return ResponseEntity(problemDetails, HttpStatus.BAD_REQUEST)
     }
 }
 

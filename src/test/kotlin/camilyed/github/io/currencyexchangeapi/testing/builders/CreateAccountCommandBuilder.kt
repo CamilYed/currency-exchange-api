@@ -1,6 +1,7 @@
 package camilyed.github.io.currencyexchangeapi.testing.builders
 
 import camilyed.github.io.currencyexchangeapi.application.CreateAccountCommand
+import camilyed.github.io.currencyexchangeapi.domain.OperationId
 import java.math.BigDecimal
 import java.util.UUID
 
@@ -19,7 +20,7 @@ class CreateAccountCommandBuilder private constructor() {
         return CreateAccountCommand(
             owner = owner,
             initialBalance = initialBalance,
-            UUID.randomUUID(),
+            OperationId(UUID.randomUUID()),
         )
     }
 

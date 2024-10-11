@@ -7,5 +7,5 @@ data class CreateAccountData(
     val id: UUID,
     val owner: String,
     val initialBalancePln: BigDecimal,
-    val operationId: UUID,
+    val operationId: OperationId,
 )

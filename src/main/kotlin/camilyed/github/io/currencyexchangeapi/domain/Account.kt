@@ -5,7 +5,7 @@ import java.math.BigDecimal
 import java.util.UUID
 
 class Account private constructor(
-    private val id: UUID,
+    private val id: AccountId,
     private val owner: String,
     private var balancePln: Money = Money(BigDecimal.ZERO, "PLN"),
     private var balanceUsd: Money = Money(BigDecimal.ZERO, "USD"),
@@ -20,7 +20,7 @@ class Account private constructor(
     fun exchangePlnToUsd(
         amountPln: Money,
         exchangeRate: ExchangeRate,
-        operationId: UUID,
+        operationId: OperationId,
     ) {
         require(!amountPln.isZero()) {
             throw InvalidAmountException("Amount must be greater than 0")
@@ -37,7 +37,7 @@ class Account private constructor(
 
         addEvent(
             AccountEvent.PlnToUsdExchangeEvent(
-                accountId = id,
+                accountId = id.value,
                 operationId = operationId,
                 amountPln = amountPln.amount,
                 amountUsd = amountUsd.amount,
@@ -61,25 +61,25 @@ class Account private constructor(
         balancePln += amountPln
     }
 
-    private fun addEvent(event: AccountEvent) {
-        events.add(event)
-    }
-
     fun getEvents(): List<AccountEvent> = events.toList()
 
     fun toSnapshot(): AccountSnapshot {
         return AccountSnapshot(
-            id = id,
+            id = id.value,
             owner = owner,
             balancePln = balancePln.amount,
             balanceUsd = balanceUsd.amount,
         )
     }
 
+    private fun addEvent(event: AccountEvent) {
+        events.add(event)
+    }
+
     companion object {
         fun createNewAccount(data: CreateAccountData): Account {
             val account = Account(
-                id = data.id,
+                id = AccountId(data.id),
                 owner = data.owner,
                 balancePln = Money.pln(data.initialBalancePln),
                 balanceUsd = Money.usd(BigDecimal.ZERO),
@@ -97,7 +97,7 @@ class Account private constructor(
 
         fun fromSnapshot(snapshot: AccountSnapshot): Account {
             return Account(
-                id = snapshot.id,
+                id = AccountId(snapshot.id),
                 owner = snapshot.owner,
                 balancePln = Money.pln(snapshot.balancePln),
                 balanceUsd = Money.usd(snapshot.balanceUsd),

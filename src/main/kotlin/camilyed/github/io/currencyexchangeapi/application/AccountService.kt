@@ -8,7 +8,7 @@ import camilyed.github.io.currencyexchangeapi.domain.AccountRepository
 import camilyed.github.io.currencyexchangeapi.domain.AccountSnapshot
 import camilyed.github.io.currencyexchangeapi.domain.CreateAccountData
 import camilyed.github.io.currencyexchangeapi.domain.CurrentExchangeRateProvider
-import camilyed.github.io.currencyexchangeapi.infrastructure.executeInTransaction
+import camilyed.github.io.currencyexchangeapi.infrastructure.inTransaction
 import java.util.UUID
 
 class AccountService(
@@ -18,13 +18,13 @@ class AccountService(
 ) {
 
     fun create(command: CreateAccountCommand): AccountSnapshot {
-        val accountId = accountOperationRepository.findAccountIdBy(command.commandId)
+        val accountId = accountOperationRepository.findAccountIdBy(command.operationId)
         if (accountId != null) {
-            return executeInTransaction { findAccount(accountId).toSnapshot() }
+            return inTransaction { findAccount(accountId).toSnapshot() }
         }
         val id = repository.nextAccountId()
         val account = Account.createNewAccount(command.toCreateAccountData(id))
-        executeInTransaction {
+        inTransaction {
             repository.save(account)
             val events = account.getEvents()
             accountOperationRepository.save(events)
@@ -33,18 +33,18 @@ class AccountService(
     }
 
     fun exchangePlnToUsd(command: ExchangePlnToUsdCommand): AccountSnapshot {
-        val accountId = accountOperationRepository.findAccountIdBy(command.commandId)
+        val accountId = accountOperationRepository.findAccountIdBy(command.operationId)
         if (accountId != null) {
-            return executeInTransaction { findAccount(accountId).toSnapshot() }
+            return inTransaction { findAccount(accountId).toSnapshot() }
         }
-        val account = executeInTransaction { findAccount(command.accountId) }
+        val account = inTransaction { findAccount(command.accountId) }
         val currentExchange = currentExchangeRateProvider.currentExchange()
         account.exchangePlnToUsd(
             amountPln = Money.pln(command.amount),
             exchangeRate = currentExchange,
-            operationId = command.commandId,
+            operationId = command.operationId,
         )
-        executeInTransaction {
+        inTransaction {
             repository.save(account)
             accountOperationRepository.save(account.getEvents())
         }
@@ -65,6 +65,6 @@ class AccountService(
         id = id,
         owner = this.owner,
         initialBalancePln = this.initialBalance,
-        operationId = this.commandId,
+        operationId = this.operationId,
     )
 }

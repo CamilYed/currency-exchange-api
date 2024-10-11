@@ -114,5 +114,22 @@ class AccountCreationIntegrationTest :
             .hasProblemDetail("X-Request-Id", "X-Request-Id is required and must be a valid UUID")
     }
 
+    @Test
+    fun `should get error if X-Request-Id is insecure`() {
+        // given
+        val insecureUUID = "00000000-0000-0000-0000-000000000000"
+
+        // when
+        val response = createAccount(aCreateAccount().withXRequestId(insecureUUID))
+
+        // then
+        expectThat(response)
+            .isBadRequest()
+            .hasProblemDetail(
+                "X-Request-Id",
+                "Insecure operation: UUID $insecureUUID does not meet security requirements.",
+            )
+    }
+
     // TODO add test for optimistick locking ?
 }

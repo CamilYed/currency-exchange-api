@@ -7,3 +7,5 @@ class InsufficientFundsException(message: String) : RuntimeException(message)
 class InvalidAmountException(message: String) : RuntimeException(message)
 
 class InvalidExchangeRateException(message: String) : RuntimeException(message)
+
+class InsecureOperationException(message: String) : RuntimeException(message)

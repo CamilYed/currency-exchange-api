@@ -20,7 +20,7 @@ class Account private constructor(
     fun exchangePlnToUsd(
         amountPln: Money,
         exchangeRate: ExchangeRate,
-        operationId: UUID,
+        operationId: OperationId,
     ) {
         require(!amountPln.isZero()) {
             throw InvalidAmountException("Amount must be greater than 0")
@@ -38,7 +38,7 @@ class Account private constructor(
         addEvent(
             AccountEvent.PlnToUsdExchangeEvent(
                 accountId = id.value,
-                operationId = operationId,
+                operationId = operationId.value,
                 amountPln = amountPln.amount,
                 amountUsd = amountUsd.amount,
                 exchangeRate = exchangeRate.rate,

@@ -29,16 +29,11 @@ private class ConfigurableUUIDValidator(private val entropyThreshold: Double) : 
 private fun isValidUUID(uuid: UUID, entropyThreshold: Double): Boolean {
     val uuidString = uuid.toString().replace("-", "")
 
-    if (uuidString.length != UUID_LENGTH_WITHOUT_DASHES) {
-        return false
-    }
+    val isInvalid = uuidString.length != UUID_LENGTH_WITHOUT_DASHES ||
+        uuidString.all { it == uuidString[0] } ||
+        calculateEntropy(uuidString) <= entropyThreshold
 
-    val firstChar = uuidString[0]
-    val allSameChars = uuidString.all { it == firstChar }
-    if (allSameChars) return false
-
-    val entropy = calculateEntropy(uuidString)
-    return entropy > entropyThreshold
+    return !isInvalid
 }
 
 private fun calculateEntropy(input: String): Double {

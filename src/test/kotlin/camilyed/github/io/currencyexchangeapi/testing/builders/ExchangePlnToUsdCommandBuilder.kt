@@ -1,6 +1,7 @@
 package camilyed.github.io.currencyexchangeapi.testing.builders
 
 import camilyed.github.io.currencyexchangeapi.application.ExchangePlnToUsdCommand
+import camilyed.github.io.currencyexchangeapi.domain.OperationId
 import java.math.BigDecimal
 import java.util.UUID
 
@@ -16,7 +17,7 @@ class ExchangePlnToUsdCommandBuilder private constructor() {
         return ExchangePlnToUsdCommand(
             accountId = accountId,
             amount = amount,
-            commandId = UUID.randomUUID(),
+            operationId = OperationId(UUID.randomUUID()),
         )
     }
 

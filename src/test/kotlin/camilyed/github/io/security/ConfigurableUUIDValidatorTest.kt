@@ -2,8 +2,8 @@ package camilyed.github.io.security
 
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
-import strikt.assertions.isTrue
 import strikt.assertions.isFalse
+import strikt.assertions.isTrue
 import java.util.UUID
 
 class ConfigurableUUIDValidatorTest {
@@ -12,7 +12,7 @@ class ConfigurableUUIDValidatorTest {
     fun `should return secure for valid UUID with custom entropy threshold`() {
         // given
         val validUUID = UUID.fromString("f47ac10b-58cc-4372-a567-0e02b2c3d479")
-        val validator = UUIDSecureValidator.configurable(2.5) // Niższy próg entropii
+        val validator = UUIDSecureValidator.configurable(2.5)
 
         // when
         val result = validator.isSecure(validUUID)
@@ -38,7 +38,7 @@ class ConfigurableUUIDValidatorTest {
     fun `should return insecure for valid UUID with high entropy threshold`() {
         // given
         val validUUID = UUID.fromString("f47ac10b-58cc-4372-a567-0e02b2c3d479")
-        val validator = UUIDSecureValidator.configurable(5.0) // Wysoki próg entropii
+        val validator = UUIDSecureValidator.configurable(5.0)
 
         // when
         val result = validator.isSecure(validUUID)

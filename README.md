@@ -256,7 +256,7 @@ In this example, the test is written in a readable DSL style, ensuring clarity a
    ./gradlew runDev
    ```
 
-4. The application will be accessible at `http://localhost:8080`.
+4. The application will be accessible at `http://localhost:8090`.
 
 ## Running Tests
 

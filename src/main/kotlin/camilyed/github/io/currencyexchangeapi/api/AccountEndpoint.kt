@@ -4,6 +4,7 @@ import camilyed.github.io.currencyexchangeapi.application.AccountService
 import camilyed.github.io.currencyexchangeapi.application.CreateAccountCommand
 import camilyed.github.io.currencyexchangeapi.application.ExchangePlnToUsdCommand
 import camilyed.github.io.currencyexchangeapi.domain.AccountSnapshot
+import camilyed.github.io.currencyexchangeapi.domain.OperationId
 import camilyed.github.io.currencyexchangeapi.infrastructure.InvalidHeaderException
 import jakarta.validation.Valid
 import jakarta.validation.constraints.NotBlank
@@ -26,12 +27,12 @@ class AccountEndpoint(private val accountService: AccountService) {
     @PostMapping
     fun createAccount(
         @Valid @RequestBody request: CreateAccountJson,
-        @RequestHeader("X-Request-Id") requestId: String?,
+        @RequestHeader("X-Request-Id") requestId: XRequestId?,
     ): ResponseEntity<AccountCreatedJson> {
         if (requestId == null) {
             throw InvalidHeaderException("X-Request-Id is required and must be a valid UUID")
         }
-        val account = accountService.create(request.toCommand(requestId.toUUID()))
+        val account = accountService.create(request.toCommand(requestId.toOperationId()))
         return ResponseEntity.status(HttpStatus.CREATED).body(account.toAccountCreatedJson())
     }
 
@@ -43,7 +44,7 @@ class AccountEndpoint(private val accountService: AccountService) {
         if (requestId == null) {
             throw InvalidHeaderException("X-Request-Id is required and must be a valid UUID")
         }
-        val command = request.toCommand(requestId.toUUID())
+        val command = request.toCommand(requestId.toOperationId())
         val account = accountService.exchangePlnToUsd(command)
         return ResponseEntity.ok(account.toAccountSnapshotJson())
     }
@@ -76,26 +77,18 @@ class AccountEndpoint(private val accountService: AccountService) {
         val id: String,
     )
 
-    private fun CreateAccountJson.toCommand(commandId: UUID) =
+    private fun CreateAccountJson.toCommand(operationId: OperationId) =
         CreateAccountCommand(
             owner = this.owner!!,
             initialBalance = BigDecimal(this.initialBalance),
-            commandId,
+            operationId,
         )
 
-    private fun ExchangePlnToUsdJson.toCommand(operationId: UUID) = ExchangePlnToUsdCommand(
+    private fun ExchangePlnToUsdJson.toCommand(operationId: OperationId) = ExchangePlnToUsdCommand(
         accountId = UUID.fromString(this.accountId),
         amount = BigDecimal(this.amount),
-        commandId = operationId,
+        operationId = operationId,
     )
-
-    private fun String.toUUID(): UUID {
-        try {
-            return UUID.fromString(this)
-        } catch (_: IllegalArgumentException) {
-            throw InvalidHeaderException("X-Request-Id is required and must be a valid UUID")
-        }
-    }
 
     private fun AccountSnapshot.toAccountCreatedJson() = AccountCreatedJson(this.id.toString())
 

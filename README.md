@@ -237,6 +237,8 @@ In both account creation and currency exchange operations, the application enfor
 
 This mechanism adds an additional layer of security, making sure that every operation (such as account creation and currency exchanges) is uniquely and safely identified.
 
+For a detailed explanation of the entropy validation algorithm, [see the full algorithm description](./entropy-validation.md).
+
 ## Tests
 
 The project includes integration tests that use a DSL to improve readability and maintainability, inspired by [Allegro's blog post on readable tests](https://blog.allegro.tech/2022/02/readable-tests-by-example.html).

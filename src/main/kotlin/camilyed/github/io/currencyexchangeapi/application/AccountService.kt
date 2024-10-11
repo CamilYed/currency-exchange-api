@@ -65,6 +65,6 @@ class AccountService(
         id = id,
         owner = this.owner,
         initialBalancePln = this.initialBalance,
-        operationId = this.operationId.value,
+        operationId = this.operationId,
     )
 }

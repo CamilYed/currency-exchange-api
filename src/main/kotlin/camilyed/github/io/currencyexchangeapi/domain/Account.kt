@@ -38,7 +38,7 @@ class Account private constructor(
         addEvent(
             AccountEvent.PlnToUsdExchangeEvent(
                 accountId = id.value,
-                operationId = operationId.value,
+                operationId = operationId,
                 amountPln = amountPln.amount,
                 amountUsd = amountUsd.amount,
                 exchangeRate = exchangeRate.rate,

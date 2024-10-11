@@ -34,7 +34,7 @@ class PostgresAccountOperationRepository(
                         it[id] = UUID.randomUUID()
                         it[accountId] = event.accountId
                         it[operationType] = "CREATE_ACCOUNT"
-                        it[operationId] = event.operationId
+                        it[operationId] = event.operationId.value
                         it[createdAt] = timestamp
                         it[amountPln] = event.initialBalancePln
                         it[amountUsd] = null
@@ -48,7 +48,7 @@ class PostgresAccountOperationRepository(
                         it[id] = UUID.randomUUID()
                         it[accountId] = event.accountId
                         it[operationType] = "PLN_TO_USD"
-                        it[operationId] = event.operationId
+                        it[operationId] = event.operationId.value
                         it[createdAt] = timestamp
                         it[amountPln] = event.amountPln
                         it[amountUsd] = event.amountUsd

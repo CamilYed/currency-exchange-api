@@ -8,6 +8,7 @@ import camilyed.github.io.currencyexchangeapi.domain.AccountRepository
 import camilyed.github.io.currencyexchangeapi.domain.AccountSnapshot
 import camilyed.github.io.currencyexchangeapi.domain.CreateAccountData
 import camilyed.github.io.currencyexchangeapi.domain.CurrentExchangeRateProvider
+import camilyed.github.io.currencyexchangeapi.domain.OperationId
 import camilyed.github.io.currencyexchangeapi.infrastructure.inTransaction
 import java.util.UUID
 
@@ -18,7 +19,7 @@ class AccountService(
 ) {
 
     fun create(command: CreateAccountCommand): AccountSnapshot {
-        val accountId = accountOperationRepository.findAccountIdBy(command.commandId)
+        val accountId = accountOperationRepository.findAccountIdBy(OperationId(command.commandId))
         if (accountId != null) {
             return inTransaction { findAccount(accountId).toSnapshot() }
         }
@@ -33,7 +34,7 @@ class AccountService(
     }
 
     fun exchangePlnToUsd(command: ExchangePlnToUsdCommand): AccountSnapshot {
-        val accountId = accountOperationRepository.findAccountIdBy(command.commandId)
+        val accountId = accountOperationRepository.findAccountIdBy(OperationId(command.commandId))
         if (accountId != null) {
             return inTransaction { findAccount(accountId).toSnapshot() }
         }

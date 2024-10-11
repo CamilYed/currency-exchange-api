@@ -4,7 +4,7 @@ import java.util.UUID
 
 interface AccountOperationRepository {
 
-    fun findAccountIdBy(operationId: UUID): UUID?
+    fun findAccountIdBy(operationId: OperationId): UUID?
 
     fun save(events: List<AccountEvent>)
 }

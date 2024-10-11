@@ -2,6 +2,7 @@ package camilyed.github.io.currencyexchangeapi.adapters.postgres
 
 import camilyed.github.io.currencyexchangeapi.domain.AccountEvent
 import camilyed.github.io.currencyexchangeapi.domain.AccountOperationRepository
+import camilyed.github.io.currencyexchangeapi.domain.OperationId
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.springframework.stereotype.Component
@@ -14,11 +15,11 @@ class PostgresAccountOperationRepository(
     private val clock: Clock,
 ) : AccountOperationRepository {
 
-    override fun findAccountIdBy(operationId: UUID): UUID? {
+    override fun findAccountIdBy(operationId: OperationId): UUID? {
         return transaction {
             AccountOperationsTable
                 .select(AccountOperationsTable.accountId)
-                .where { AccountOperationsTable.operationId eq operationId }
+                .where { AccountOperationsTable.operationId eq operationId.value }
                 .map { it[AccountOperationsTable.accountId] }
                 .singleOrNull()
         }

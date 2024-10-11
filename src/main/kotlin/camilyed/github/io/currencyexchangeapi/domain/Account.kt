@@ -5,7 +5,7 @@ import java.math.BigDecimal
 import java.util.UUID
 
 class Account private constructor(
-    private val id: UUID,
+    private val id: AccountId,
     private val owner: String,
     private var balancePln: Money = Money(BigDecimal.ZERO, "PLN"),
     private var balanceUsd: Money = Money(BigDecimal.ZERO, "USD"),
@@ -37,7 +37,7 @@ class Account private constructor(
 
         addEvent(
             AccountEvent.PlnToUsdExchangeEvent(
-                accountId = id,
+                accountId = id.value,
                 operationId = operationId,
                 amountPln = amountPln.amount,
                 amountUsd = amountUsd.amount,
@@ -65,7 +65,7 @@ class Account private constructor(
 
     fun toSnapshot(): AccountSnapshot {
         return AccountSnapshot(
-            id = id,
+            id = id.value,
             owner = owner,
             balancePln = balancePln.amount,
             balanceUsd = balanceUsd.amount,
@@ -79,7 +79,7 @@ class Account private constructor(
     companion object {
         fun createNewAccount(data: CreateAccountData): Account {
             val account = Account(
-                id = data.id,
+                id = AccountId(data.id),
                 owner = data.owner,
                 balancePln = Money.pln(data.initialBalancePln),
                 balanceUsd = Money.usd(BigDecimal.ZERO),
@@ -97,7 +97,7 @@ class Account private constructor(
 
         fun fromSnapshot(snapshot: AccountSnapshot): Account {
             return Account(
-                id = snapshot.id,
+                id = AccountId(snapshot.id),
                 owner = snapshot.owner,
                 balancePln = Money.pln(snapshot.balancePln),
                 balanceUsd = Money.usd(snapshot.balanceUsd),
